@@ -1,0 +1,71 @@
+Country,Country_code,Year,GINI_index,Income_share_10%,Poverty_headcount_ratio_%_(national_lines)
+Afghanistan,AFG,2011,NA,NA,38.3
+Afghanistan,AFG,2016,NA,NA,54.5
+Angola,AGO,2008,42.7,32.3,36.6
+Bangladesh,BGD,2010,32.1,26.9,31.5
+Bangladesh,BGD,2016,32.4,26.8,24.3
+Benin,BEN,2010,NA,NA,35.2
+Benin,BEN,2011,43.4,34.5,36.2
+Benin,BEN,2015,47.8,37.6,40.1
+Bhutan,BTN,2012,38.8,30.7,12
+Bhutan,BTN,2017,37.4,27.9,8.2
+Burkina Faso,BFA,2009,39.8,32,46.7
+Burkina Faso,BFA,2014,35.3,29.6,40.1
+Burundi,BDI,2013,38.6,31,64.9
+Burundi,BDI,2014,NA,NA,64.9
+Cambodia,KHM,2008,NA,NA,34
+Cambodia,KHM,2009,NA,NA,23.9
+Cambodia,KHM,2010,NA,NA,22.1
+Cambodia,KHM,2011,NA,NA,20.5
+Cambodia,KHM,2012,NA,NA,17.7
+Central African Republic,CAF,2008,56.2,46.2,62
+Chad,TCD,2011,43.3,32.4,46.7
+Comoros,COM,2013,45.3,33.7,42.4
+"Congo, Dem. Rep.",COD,2012,42.1,32,63.9
+Djibouti,DJI,2012,45.1,34.4,NA
+Djibouti,DJI,2013,44.1,34.1,NA
+Djibouti,DJI,2017,41.6,32.3,21.1
+"Gambia, The",GMB,2010,43.6,34.9,48.1
+"Gambia, The",GMB,2015,35.9,28.7,48.6
+Guinea,GIN,2012,33.7,26.4,55.2
+Guinea-Bissau,GNB,2010,50.7,42,69.3
+Haiti,HTI,2012,41.1,31.2,58.5
+Lao PDR,LAO,2012,36.4,29.8,23.4
+Lesotho,LSO,2010,54.2,40.9,NA
+Lesotho,LSO,2017,NA,NA,49.7
+Liberia,LBR,2014,33.2,26,54.1
+Liberia,LBR,2016,35.3,27.1,50.9
+Madagascar,MDG,2010,42.4,34.3,71.7
+Madagascar,MDG,2012,42.6,33.5,70.7
+Malawi,MWI,2010,45.5,36.9,50.7
+Malawi,MWI,2016,44.7,38.1,51.5
+Mali,MLI,2009,33,25.7,41.1
+Mauritania,MRT,2008,35.7,26.2,42
+Mauritania,MRT,2014,32.6,24.9,31
+Mozambique,MOZ,2008,45.6,36.8,54.7
+Mozambique,MOZ,2014,54,45.5,46.1
+Myanmar,MMR,2010,NA,NA,42.4
+Myanmar,MMR,2015,38.1,31.7,32.1
+Nepal,NPL,2010,32.8,26.4,25.2
+Niger,NER,2011,31.5,26.4,48.9
+Niger,NER,2014,34.3,27,44.5
+Rwanda,RWA,2010,47.2,39.8,46
+Rwanda,RWA,2013,45.1,37.9,39.1
+Rwanda,RWA,2016,43.7,35.6,38.2
+Sao Tome and Principe,STP,2010,30.8,24.2,66.2
+Senegal,SEN,2011,40.3,31,46.7
+Sierra Leone,SLE,2011,34,26.9,52.9
+Solomon Islands,SLB,2013,37.1,29.2,12.7
+Sudan,SDN,2009,35.4,26.7,46.5
+Tanzania,TZA,2011,37.8,31,28.2
+Timor-Leste,TLS,2014,28.7,24,41.8
+Togo,TGO,2011,46,34.5,58.7
+Togo,TGO,2015,43.1,31.6,55.1
+Tuvalu,TUV,2010,39.1,30.7,26.3
+Uganda,UGA,2009,44.2,36.4,24.5
+Uganda,UGA,2012,41,32.9,19.7
+Uganda,UGA,2016,42.8,34.2,21.4
+Vanuatu,VUT,2010,37.6,29.4,12.7
+"Yemen, Rep.",YEM,2014,36.7,29.4,48.6
+Zambia,ZMB,2010,55.6,45.2,54.7
+Zambia,ZMB,2015,57.1,44.4,54.4

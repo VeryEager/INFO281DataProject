@@ -19,7 +19,7 @@ format.project.econdata <- function(toFormat){
 
 
 #Declare constants for economic file loading
-address <- "C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/Project Data/"
+address <- "C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/project_material/data/"
 econfiles <- c("Developing_Nations IM-EX[GOOD] (2008-2017).csv", "Developing_Nations IM-EX[GOOD-TYPE] (2008-2017).csv", 
                "Developing_Nations IM-EX[SERVICE] (2008-2017).csv")
 

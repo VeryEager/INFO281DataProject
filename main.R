@@ -68,15 +68,15 @@ colnames(econdata) <-
     "Trade_flow",
     "Units",
     "Year",
-    "Agricultural_products_(GOOD)",
-    "Commercial_services_(SERVICE)",
-    "Fuels/Mining_products_(GOOD)",
-    "Good-related_services_(SERVICE)",
-    "Manufactured_products_(GOOD)",
-    "Other_commercial_services_(SERVICE)",
-    "Total_products_(GOOD)",
-    "Transport_services_(SERVICE)",
-    "Travel_service_(SERVICE)"
+    "Agricultural_products",
+    "Commercial_services",
+    "Fuels/Mining_products",
+    "Good-related_services",
+    "Manufactured_products",
+    "Other_commercial_services",
+    "Total_products",
+    "Transport_services",
+    "Travel_service"
   )
 
 
@@ -139,8 +139,8 @@ colnames(inqdata) <-
     "Country_code",
     "Year",
     "GINI_index",
-    "Income_share_10%",
-    "Poverty_headcount_ratio_%_(national_lines)"
+    "Income_share_held_by_top_10%",
+    "Poverty_headcount_ratio_%_(at_national_lines)"
   )
 inqdata$Year <- as.numeric(as.character(inqdata$Year))
 

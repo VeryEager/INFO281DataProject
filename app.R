@@ -7,8 +7,16 @@ helpicon <-
 
 #available options for selecting country-by-country data
 country_selection <- unique(econdata$Country)
+
 econ_selection <- colnames(econdata)
+econ_selection <- econ_selection[-(1:5)]
+econ_selection <- gsub("_", " ", econ_selection)
+
 inq_selection <- colnames(inqdata)
+inq_selection <- inq_selection[-(1:3)]
+inq_selection <- gsub("_", " ", inq_selection)
+
+
 
 
 # --------FORMAT UI--------
@@ -37,7 +45,7 @@ ui <-
             )
           ),
           
-          #Economic data select (and help)
+          #Economic data select (and help button)
           inputPanel(
             selectInput(
               inputId = "econ_select",
@@ -53,7 +61,7 @@ ui <-
             )
           ),
           
-          #Inequality data select (and help)
+          #Inequality data select (and help button)
           inputPanel(
             selectInput(
               inputId = "inq_select",
@@ -69,22 +77,46 @@ ui <-
             )
           )
         ),
+        
+        #Do analysis 
+        
         #view for country/data analysis
-        mainPanel(plotOutput(outputId = "country_plot"),
-                  width = 8)
+        mainPanel(verticalLayout(
+          plotOutput(outputId = "country_econ_plot"),
+          plotOutput(outputId = "country_inq_plot"),
+          width = 8
+        ))
       )
     )),
     tabPanel("New Zealand Analysis")
   )
 
 
+
+
 # --------FORMAT SERVER--------
 server <-
   function(input, output) {
-    output$country_plot <- renderPlot({
-      plot(mtcars$wt, mtcars$mpg)
-    })
+    #render economic plot
+    output$country_econ_plot <-
+      renderPlot({
+        plot(econdata$Year,
+             econdata$Year,
+             xlab = "Year",
+             ylab = econdata$Units[1]) #TODO: econdata$Year needs to be changed to reflect appropriate row/col values
+      })
+    
+    #render inequality plot
+    output$country_inq_plot <-
+      renderPlot({
+        plot(inqdata$Year,
+             inqdata$Year,
+             xlab = "Year",
+             ylab = "Index") #TODO: inqdata$Year and index need to be changed to reflect appropriate data
+      })
   }
+
+
 
 
 # --------RUN APPLICATION--------

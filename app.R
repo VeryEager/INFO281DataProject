@@ -21,8 +21,7 @@ inq_selection <- gsub("_", " ", inq_selection)
 
 # --------FORMAT UI--------
 ui <-
-  navbarPage(
-    "My Project",
+  fluidPage(tabsetPanel(
     #Country Analysis tab
     tabPanel("Country Analysis", fluidPage(
       #Viewing and manipulating country analysis
@@ -30,13 +29,15 @@ ui <-
         #Data selection for country/data analysis
         sidebarPanel(
           #Country select (and help button)
+          h4("Data Selection"),
+          
           inputPanel(
             selectInput(
               inputId = "country_select",
               "Country",
               choices = country_selection,
               multiple = FALSE,
-              width = 250
+              selectize = T
             ),
             actionButton(
               inputId = "country_help",
@@ -52,7 +53,7 @@ ui <-
               "Economic Indicator",
               choices = econ_selection,
               multiple = FALSE,
-              width = 250
+              selectize = T
             ),
             actionButton(
               inputId = "econ_help",
@@ -68,28 +69,31 @@ ui <-
               "Inequality Indicator",
               choices = inq_selection,
               multiple = FALSE,
-              width = 250
+              selectize = T
             ),
             actionButton(
               inputId = "inq_help",
               label = "",
               icon = helpicon
             )
-          )
+          ),
+          
+          width = 3
         ),
         
-        #Do analysis 
+        #Do analysis
         
         #view for country/data analysis
-        mainPanel(verticalLayout(
+        mainPanel(
           plotOutput(outputId = "country_econ_plot"),
           plotOutput(outputId = "country_inq_plot"),
-          width = 8
-        ))
+          verbatimTextOutput(outputId = "correlation_stats", placeholder = T),
+        ),
+        fluid = T
       )
     )),
     tabPanel("New Zealand Analysis")
-  )
+  ))
 
 
 
@@ -113,6 +117,12 @@ server <-
              inqdata$Year,
              xlab = "Year",
              ylab = "Index") #TODO: inqdata$Year and index need to be changed to reflect appropriate data
+      })
+    
+    #render statistical summary of country data
+    output$correlation_stats <-
+      renderText({
+        "PLACEHOLDER; STATISTICAL SUMMARY WILL BE DISPLAYED HERE."
       })
   }
 

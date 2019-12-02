@@ -1,4 +1,4 @@
-Country,Country_code,Year,GINI_index,Income_share_10%,Poverty_headcount_ratio_%_(national_lines)
+Country,Country_code,Year,GINI_index,Income_share_held_by_top_10%,Poverty_headcount_ratio_%_(at_national_lines)
 Afghanistan,AFG,2011,NA,NA,38.3
 Afghanistan,AFG,2016,NA,NA,54.5
 Angola,AGO,2008,42.7,32.3,36.6

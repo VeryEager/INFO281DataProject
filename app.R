@@ -1,4 +1,5 @@
 library(shiny)
+library(shinythemes)
 
 # --------PRELIMINARY OPERATIONS--------
 #icon used in "Help" buttons
@@ -9,8 +10,9 @@ helpicon <-
 country_selection <- unique(econdata$Country)
 
 econ_selection <- colnames(econdata)
-econ_selection <- econ_selection[-(1:5)]
+econ_selection <- econ_selection[-(1:4)]
 econ_selection <- gsub("_", " ", econ_selection)
+econ_selection <- sort(econ_selection)
 
 inq_selection <- colnames(inqdata)
 inq_selection <- inq_selection[-(1:3)]
@@ -23,13 +25,14 @@ inq_selection <- gsub("_", " ", inq_selection)
 ui <-
   fluidPage(tabsetPanel(
     #Country Analysis tab
-    tabPanel("Country Analysis", fluidPage(
+    tabPanel("Country Analysis", 
       #Viewing and manipulating country analysis
       sidebarLayout(
         #Data selection for country/data analysis
         sidebarPanel(
           #Country select (and help button)
           h4("Data Selection"),
+          
           
           inputPanel(
             selectInput(
@@ -60,6 +63,7 @@ ui <-
               label = "",
               icon = helpicon
             )
+            
           ),
           
           #Inequality data select (and help button)
@@ -87,13 +91,17 @@ ui <-
         mainPanel(
           plotOutput(outputId = "country_econ_plot"),
           plotOutput(outputId = "country_inq_plot"),
-          verbatimTextOutput(outputId = "correlation_stats", placeholder = T),
+          verbatimTextOutput(outputId = "correlation_stats", placeholder = T)
         ),
         fluid = T
       )
-    )),
+    ),
     tabPanel("New Zealand Analysis")
-  ))
+  ),
+  
+  title = "Trade Balance and Inequality; an Analysis",
+  theme = shinytheme("sandstone")
+  )
 
 
 

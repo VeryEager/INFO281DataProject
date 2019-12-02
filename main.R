@@ -57,7 +57,8 @@ while (econ_iterator <= length(econfiles))
 }
 econdata <- spread(econdata, Indicator_desc, Value)
 econdata <-
-  econdata[!(econdata$Reporter_desc == "Kiribati"), ] #remove Kiribati due to lack of relevant inequality data
+  econdata[!(econdata$Reporter_desc == "Kiribati"),] #remove Kiribati due to lack of relevant inequality data
+econdata[econdata == 0] <- NA #converts all '0' values into NAs
 
 
 #Rename columns to better reflect data
@@ -70,8 +71,8 @@ colnames(econdata) <-
     "Year",
     "Agricultural_products",
     "Commercial_services",
-    "Fuels/Mining_products",
-    "Good-related_services",
+    "Fuels_and_Mining_products",
+    "Good_related_services",
     "Manufactured_products",
     "Other_commercial_services",
     "Total_products",
@@ -125,11 +126,11 @@ inqdata <-
     inqdata$`Series Name` == "Poverty headcount ratio at national poverty lines (% of population)" |
       inqdata$`Series Name` == "GINI index (World Bank estimate)" |
       inqdata$`Series Name` == "Income share held by highest 10%"
-  ), ]
+  ),]
 inqdata <- na.omit(inqdata)
 inqdata <- spread(inqdata, 'Series Name', Index)
 inqdata <-
-  inqdata[!(inqdata$`Country Name` == "Kiribati"), ] #remove Kiribati due to lack of relevant inequality data
+  inqdata[!(inqdata$`Country Name` == "Kiribati"),] #remove Kiribati due to lack of relevant inequality data
 
 
 #Rename columns to better reflect data and ensure columns are of correct type
@@ -159,7 +160,27 @@ write_csv(
 
 
 # --------CALCULATE ADDITIONAL ECONOMIC DATA AND EXPORT--------
-#Calculate trade balances
+#Format economic data to accomodate import-export columns
+econdata <-
+  pivot_wider(econdata,
+              names_from = Trade_flow,
+              values_from = colnames(econdata[6:14]))
+
+#Calculate net trade values for each category
+econdata <-
+  mutate(
+    econdata,
+    Agricultural_products_net = Agricultural_products_Exports - Agricultural_products_Imports,
+    Fuels_and_Mining_products_net = Fuels_and_Mining_products_Exports - Fuels_and_Mining_products_Imports,
+    Good_related_services_net = Good_related_services_Exports - Good_related_services_Imports,
+    Manufactured_products_net = Manufactured_products_Exports - Manufactured_products_Imports,
+    Other_commercial_services_net = Other_commercial_services_Exports - Other_commercial_services_Imports,
+    Transport_services_net = Transport_services_Exports - Transport_services_Imports,
+    Travel_service_net = Travel_service_Exports - Travel_service_Imports,
+    Net_Commercial_services = Commercial_services_Exports - Commercial_services_Imports,
+    Net_Goods = Total_products_Exports - Total_products_Imports,
+    Trade_Balance = Net_Goods + Net_Commercial_services
+  )
 
 
 #Write econdata to a new file

@@ -28,7 +28,6 @@ format.project.econdata <- function(toFormat) {
   )
 }
 
-
 #Declare constants for economic file loading
 address <-
   "C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/project_material/data/"
@@ -38,7 +37,6 @@ econfiles <-
     "Developing_Nations IM-EX[GOOD-TYPE] (2008-2017).csv",
     "Developing_Nations IM-EX[SERVICE] (2008-2017).csv"
   )
-
 
 #Load in and format raw economic data recursively
 econ_iterator <- 1L
@@ -57,9 +55,8 @@ while (econ_iterator <= length(econfiles))
 }
 econdata <- spread(econdata, Indicator_desc, Value)
 econdata <-
-  econdata[!(econdata$Reporter_desc == "Kiribati"),] #remove Kiribati due to lack of relevant inequality data
+  econdata[!(econdata$Reporter_desc == "Kiribati"), ] #remove Kiribati due to lack of relevant inequality data
 econdata[econdata == 0] <- NA #converts all '0' values into NAs
-
 
 #Rename columns to better reflect data
 colnames(econdata) <-
@@ -80,7 +77,38 @@ colnames(econdata) <-
     "Travel_service"
   )
 
+#Format economic data to accomodate import-export columns
+econdata <-
+  pivot_wider(econdata,
+              names_from = Trade_flow,
+              values_from = colnames(econdata[6:14]))
 
+#Calculate net trade values for each category
+econdata <-
+  mutate(
+    econdata,
+    Agricultural_products_net = Agricultural_products_Exports - Agricultural_products_Imports,
+    Fuels_and_Mining_products_net = Fuels_and_Mining_products_Exports - Fuels_and_Mining_products_Imports,
+    Good_related_services_net = Good_related_services_Exports - Good_related_services_Imports,
+    Manufactured_products_net = Manufactured_products_Exports - Manufactured_products_Imports,
+    Other_commercial_services_net = Other_commercial_services_Exports - Other_commercial_services_Imports,
+    Transport_services_net = Transport_services_Exports - Transport_services_Imports,
+    Travel_service_net = Travel_service_Exports - Travel_service_Imports,
+    Net_Commercial_services = Commercial_services_Exports - Commercial_services_Imports,
+    Net_Goods = Total_products_Exports - Total_products_Imports,
+    Trade_Balance = Net_Goods + Net_Commercial_services
+  )
+
+
+#Write econdata to a new file
+write_csv(
+  econdata,
+  paste(
+    address,
+    "Developing_Nations IM-EX[FORMATTED] (2008-2017).csv",
+    sep = ""
+  )
+)
 
 
 # --------LOAD, FORMAT, AND EXPORT DATA RELATED TO INEQUALITY--------
@@ -94,7 +122,6 @@ inqdata <-
     ),
     col_types = "ccccdddddddddd"
   )
-
 
 #Format data, removing irrelevant columns and null rows
 inqdata <-
@@ -126,12 +153,11 @@ inqdata <-
     inqdata$`Series Name` == "Poverty headcount ratio at national poverty lines (% of population)" |
       inqdata$`Series Name` == "GINI index (World Bank estimate)" |
       inqdata$`Series Name` == "Income share held by highest 10%"
-  ),]
+  ), ]
 inqdata <- na.omit(inqdata)
 inqdata <- spread(inqdata, 'Series Name', Index)
 inqdata <-
-  inqdata[!(inqdata$`Country Name` == "Kiribati"),] #remove Kiribati due to lack of relevant inequality data
-
+  inqdata[!(inqdata$`Country Name` == "Kiribati"), ] #remove Kiribati due to lack of relevant inequality data
 
 #Rename columns to better reflect data and ensure columns are of correct type
 colnames(inqdata) <-
@@ -145,7 +171,6 @@ colnames(inqdata) <-
   )
 inqdata$Year <- as.numeric(as.character(inqdata$Year))
 
-
 #Write inequality data to a formatted file
 write_csv(
   inqdata,
@@ -157,38 +182,42 @@ write_csv(
 )
 
 
+# --------LOAD, FORMAT, AND EXPORT DATA RELATED TO NZ--------
+#Read in NZ data from a csv
+nzdata <- read_csv(paste(address,
+                         "NZ_Trade_Data IM-EX (2017).csv",
+                         sep = ""))
 
-
-# --------CALCULATE ADDITIONAL ECONOMIC DATA AND EXPORT--------
-#Format economic data to accomodate import-export columns
-econdata <-
-  pivot_wider(econdata,
-              names_from = Trade_flow,
-              values_from = colnames(econdata[6:14]))
-
-#Calculate net trade values for each category
-econdata <-
-  mutate(
-    econdata,
-    Agricultural_products_net = Agricultural_products_Exports - Agricultural_products_Imports,
-    Fuels_and_Mining_products_net = Fuels_and_Mining_products_Exports - Fuels_and_Mining_products_Imports,
-    Good_related_services_net = Good_related_services_Exports - Good_related_services_Imports,
-    Manufactured_products_net = Manufactured_products_Exports - Manufactured_products_Imports,
-    Other_commercial_services_net = Other_commercial_services_Exports - Other_commercial_services_Imports,
-    Transport_services_net = Transport_services_Exports - Transport_services_Imports,
-    Travel_service_net = Travel_service_Exports - Travel_service_Imports,
-    Net_Commercial_services = Commercial_services_Exports - Commercial_services_Imports,
-    Net_Goods = Total_products_Exports - Total_products_Imports,
-    Trade_Balance = Net_Goods + Net_Commercial_services
+#Format the data appropriately
+nzdata <-
+  subset(
+    nzdata,
+    select = c(
+      "Partner Name",
+      "Trade Balance (US$ Thousand)",
+      "Export (US$ Thousand)",
+      "Import (US$ Thousand)"
+    )
   )
+colnames(nzdata) <-
+  c("Country",
+    "Trade_balance_(1000_US$)",
+    "Exports_(1000_US$)",
+    "Imports_(1000_US$)")
 
+#remove all countries this analysis isn't concerned with
+nzdata <-
+  nzdata[(
+    nzdata$Country %in% append(unique(inqdata$Country), c("East Timor", "Yemen"))
+  ), ]
+#Unfortunately trade data between New Zealand and Angola, Comoros, and Guinea-Bissau is unavailable; these countries have been removed from this section
 
-#Write econdata to a new file
+#Lastly write this data to a formatted file
 write_csv(
-  econdata,
+  nzdata,
   paste(
     address,
-    "Developing_Nations IM-EX[FORMATTED] (2008-2017).csv",
+    "NZ_Trade_Data IM-EX[FORMATTED] (2017).csv",
     sep = ""
   )
 )

@@ -1,6 +1,8 @@
 library(shiny)
 library(shinythemes)
 
+options(scipen = 999)
+
 # --------PRELIMINARY OPERATIONS--------
 #icon used in "Help" buttons
 helpicon <-
@@ -18,20 +20,22 @@ inq_selection <- colnames(inqdata)
 inq_selection <- inq_selection[-(1:3)]
 inq_selection <- gsub("_", " ", inq_selection)
 
+
+
 # --------FORMAT UI--------
 ui <-
   fluidPage(
     tabsetPanel(
       #Country Analysis tab
+      tabPanel("Overview"),
       tabPanel(
-        "Country Analysis",
+        "Country Exploration",
         #Viewing and manipulating country analysis
         sidebarLayout(
           #Data selection for country/data analysis
           sidebarPanel(
             #Country select (and help button)
             h4("Data Selection"),
-            
             
             inputPanel(
               selectInput(
@@ -95,7 +99,7 @@ ui <-
           fluid = T
         )
       ),
-      tabPanel("New Zealand Analysis")
+      tabPanel("New Zealand's Impact")
     ),
     
     title = "Trade Balance and Inequality; an Analysis",
@@ -112,18 +116,19 @@ server <-
     output$country_econ_plot <-
       renderPlot({
         plot_economy <-
-          econdata[, c("Country", gsub(" ", "_", "Agricultural products Exports"))] #input$econ_select
+          econdata[, c("Country", gsub(" ", "_", input$econ_select))]
         plot_economy <-
-          plot_economy[plot_economy$Country == "Afghanistan", 2] #input$country_select
+          plot_economy[plot_economy$Country == input$country_select, 2]
         plot_econ_time <-
-          econdata[econdata$Country == "Afghanistan", "Year"]
+          econdata[econdata$Country == input$country_select, "Year"]
         
         plot.default(
           as.numeric(unlist(plot_econ_time)),
           as.numeric(unlist(plot_economy)),
           type = "b",
           xlab = "Year",
-          ylab = econdata$Units[1]
+          ylab = paste(econdata$Units[1], " (millions)", sep = " "),
+          col = "#75AADB"
         )
         
       })
@@ -131,13 +136,21 @@ server <-
     #render inequality plot
     output$country_inq_plot <-
       renderPlot({
-        plot(
-          inqdata$Year,
-          inqdata$Year,
+        plot_inequality <-
+          inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
+        plot_inequality <-
+          plot_inequality[plot_inequality$Country == input$country_select, 2]
+        plot_inq_time <-
+          inqdata[inqdata$Country == input$country_select, "Year"]
+        
+        plot.default(
+          as.numeric(unlist(plot_inq_time)),
+          as.numeric(unlist(plot_inequality)),
+          type = "b",
           xlab = "Year",
-          ylab = "Index",
-          col = "#75AADB",
-        ) #TODO: inqdata$Year and index need to be changed to reflect appropriate data
+          ylab = input$inq_select,
+          col = "#75AADB"
+        )
       })
     
     #render statistical summary of country data
@@ -146,7 +159,6 @@ server <-
         "PLACEHOLDER; STATISTICAL SUMMARY WILL BE DISPLAYED HERE."
       })
   }
-
 
 
 

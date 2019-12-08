@@ -99,6 +99,15 @@ econdata <-
     Trade_Balance = Net_Goods + Net_Commercial_services
   )
 
+#Rename countries to match other datasets & maintain consistency
+econdata$Country[econdata$Country == "Democratic Republic of the Congo"] <- "Congo, Dem. Rep."
+econdata$Country[econdata$Country == "The Gambia"] <- "Gambia, The"
+econdata$Country[econdata$Country == "Lao People's Democratic Republic"] <- "Lao PDR"
+econdata$Country[econdata$Country == "Yemen"] <- "Yemen, Rep."
+
+#Divide all values to represent USD (millions) 
+econdata[colnames(econdata)[-(1:4)]] <- econdata[colnames(econdata)[-(1:4)]]/1000000
+
 
 #Write econdata to a new file
 write_csv(

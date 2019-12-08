@@ -18,9 +18,6 @@ inq_selection <- colnames(inqdata)
 inq_selection <- inq_selection[-(1:3)]
 inq_selection <- gsub("_", " ", inq_selection)
 
-
-
-
 # --------FORMAT UI--------
 ui <-
   fluidPage(
@@ -114,12 +111,21 @@ server <-
     #render economic plot
     output$country_econ_plot <-
       renderPlot({
-        plot_country <- econdata[, c("Country", gsub(" ", "_", input$econ_select))]
+        plot_economy <-
+          econdata[, c("Country", gsub(" ", "_", "Agricultural products Exports"))] #input$econ_select
+        plot_economy <-
+          plot_economy[plot_economy$Country == "Afghanistan", 2] #input$country_select
+        plot_econ_time <-
+          econdata[econdata$Country == "Afghanistan", "Year"]
         
-        plot(econdata$Year[1:10],
-             plot_country[plot_country$Country == input$country_select, 2],
-             xlab = "Year",
-             ylab = econdata$Units[1]) #TODO: econdata$Year needs to be changed to reflect appropriate row/col values
+        plot.default(
+          as.numeric(unlist(plot_econ_time)),
+          as.numeric(unlist(plot_economy)),
+          type = "b",
+          xlab = "Year",
+          ylab = econdata$Units[1]
+        )
+        
       })
     
     #render inequality plot

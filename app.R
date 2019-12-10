@@ -1,7 +1,12 @@
 library(shiny)
 library(shinythemes)
+library(extrafont)
+library(ggplot2)
+library(plotly)
 
+#---------PRELIMINARY OPERATIONS FOR DISPLAY---------
 options(scipen = 999)
+extrafont::loadfonts(device = "win")
 
 # --------PRELIMINARY OPERATIONS--------
 #icon used in "Help" buttons
@@ -44,11 +49,6 @@ ui <-
                 choices = country_selection,
                 multiple = FALSE,
                 selectize = T
-              ),
-              actionButton(
-                inputId = "country_help",
-                label = "",
-                icon = helpicon
               )
             ),
             
@@ -115,27 +115,39 @@ server <-
     #render economic plot
     output$country_econ_plot <-
       renderPlot({
-        plot_economy <-
+        #First formulate the data to plot
+        plot_econdata <-
           econdata[, c("Country", gsub(" ", "_", input$econ_select))]
-        plot_economy <-
-          plot_economy[plot_economy$Country == input$country_select, 2]
+        plot_econdata <-
+          plot_econdata[plot_econdata$Country == input$country_select, 2]
         plot_econ_time <-
           econdata[econdata$Country == input$country_select, "Year"]
         
-        plot.default(
-          as.numeric(unlist(plot_econ_time)),
-          as.numeric(unlist(plot_economy)),
-          type = "b",
-          xlab = "Year",
-          ylab = paste(econdata$Units[1], " (millions)", sep = " "),
-          col = "#75AADB"
-        )
+        #represents the final formatting of the selected data
+        econplot <- cbind(plot_econ_time, plot_econdata)
         
+        #Then plot an interactive scatterplot using ggplot
+        ggplot(data = econplot, aes(x = econplot[[1]], y = econplot[[2]], color = econplot[[2]]), group = 1) +
+          theme(text = element_text(family = "Arial", size = 16)) +
+          geom_point(shape = 15, size = 5, show.legend = F) +
+          geom_line(alpha = 0.5, color = "black", size = 0.5) +
+          scale_x_continuous(breaks = econplot[[1]]) + 
+          labs(
+            x = "Year",
+            y = paste(
+              input$econ_select,
+              "(millions USD)",
+              sep = " "
+            )
+          ) +
+          scale_color_gradient2(midpoint = 0, low = "red", mid = "#FFCC33", high = "green")
       })
     
     #render inequality plot
     output$country_inq_plot <-
       renderPlot({
+        #First formulate the data to plot
+        
         plot_inequality <-
           inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
         plot_inequality <-
@@ -143,14 +155,9 @@ server <-
         plot_inq_time <-
           inqdata[inqdata$Country == input$country_select, "Year"]
         
-        plot.default(
-          as.numeric(unlist(plot_inq_time)),
-          as.numeric(unlist(plot_inequality)),
-          type = "b",
-          xlab = "Year",
-          ylab = input$inq_select,
-          col = "#75AADB"
-        )
+        
+        #Then plot an interactive scatterplot using ggplot
+        
       })
     
     #render statistical summary of country data

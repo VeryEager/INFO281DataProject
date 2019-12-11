@@ -94,9 +94,9 @@ econdata <-
     Other_commercial_services_net = Other_commercial_services_Exports - Other_commercial_services_Imports,
     Transport_services_net = Transport_services_Exports - Transport_services_Imports,
     Travel_service_net = Travel_service_Exports - Travel_service_Imports,
-    Net_Commercial_services = Commercial_services_Exports - Commercial_services_Imports,
-    Net_Goods = Total_products_Exports - Total_products_Imports,
-    Trade_Balance = Net_Goods + Net_Commercial_services
+    Commercial_services_net = Commercial_services_Exports - Commercial_services_Imports,
+    Total_products_net = Total_products_Exports - Total_products_Imports,
+    Trade_Balance = Total_products_net + Commercial_services_net
   )
 
 #Rename countries to match other datasets & maintain consistency

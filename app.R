@@ -2,7 +2,6 @@ library(shiny)
 library(shinythemes)
 library(extrafont)
 library(ggplot2)
-library(plotly)
 
 #---------PRELIMINARY OPERATIONS FOR DISPLAY---------
 options(scipen = 999)
@@ -140,7 +139,7 @@ server <-
               sep = " "
             )
           ) +
-          scale_color_gradient2(midpoint = 0, low = "red", mid = "#FFCC33", high = "green")
+          scale_color_gradient2(midpoint = 0, low = "#CC0000", mid = "#FFCC33", high = "#33FF00")
       })
     
     #render inequality plot
@@ -148,16 +147,26 @@ server <-
       renderPlot({
         #First formulate the data to plot
         
-        plot_inequality <-
+        plot_inqdata <-
           inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
-        plot_inequality <-
-          plot_inequality[plot_inequality$Country == input$country_select, 2]
+        plot_inqdata <-
+          plot_inqdata[plot_inqdata$Country == input$country_select, 2]
         plot_inq_time <-
           inqdata[inqdata$Country == input$country_select, "Year"]
         
+        #represents the final formatting of the selected data
+        inqplot <- cbind(plot_inq_time, plot_inqdata)
         
         #Then plot an interactive scatterplot using ggplot
-        
+        ggplot(data = inqplot, aes(x = inqplot[[1]], y = inqplot[[2]]), group = 1) +
+          theme(text = element_text(family = "Arial", size = 16)) +
+          geom_point(shape = 15, color = "#0066CC", size = 5, show.legend = F) +
+          geom_line(alpha = 0.5, color = "black", size = 0.5) +
+          scale_x_continuous(breaks = inqplot[[1]]) + 
+          labs(
+            x = "Year",
+            y = input$inq_select
+          )        
       })
     
     #render statistical summary of country data

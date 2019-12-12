@@ -14,7 +14,8 @@ helpicon <-
   icon("question-circle", class = NULL, lib = "font-awesome")
 
 #dataframe used in "help" button presses
-measure_descr <- read_csv(paste(address, "project_metadata.csv", sep = ""))
+measure_descr <-
+  read_csv(paste(address, "project_metadata.csv", sep = ""))
 
 #available options for selecting country-by-country data
 country_selection <- unique(econdata$Country)
@@ -51,54 +52,69 @@ ui <-
                 "Country",
                 choices = country_selection,
                 multiple = FALSE,
-                selectize = T
+                selectize = ,
+                width = "180px"
               )
             ),
             
             #Economic data select (and help button)
-            inputPanel(
+            inputPanel(verticalLayout(
               selectInput(
                 inputId = "econ_select",
                 "Economic Indicator",
                 choices = econ_selection,
                 multiple = FALSE,
-                selectize = T
+                selectize = T,
+                width = "180px"
               ),
               actionButton(
                 inputId = "help_econ",
                 label = "What does this mean?",
+                style = 'padding:4px; font-size:80%'
               )
-            ),
+            )),
             
             #Inequality data select (and help button)
-            inputPanel(
+            inputPanel(verticalLayout(
               selectInput(
                 inputId = "inq_select",
                 "Inequality Indicator",
                 choices = inq_selection,
                 multiple = FALSE,
-                selectize = T
+                selectize = T,
+                width = "180px"
               ),
               actionButton(
                 inputId = "help_inq",
                 label = "What does this mean?",
+                style = 'padding:4px; font-size:80%'
               )
-            ),
+            )),
             
             #Output panels for help buttons
-            inputPanel(textOutput("help_title", container = h4), textOutput("help_display", container = h5)),
-            
-            width = 3
+            inputPanel(verticalLayout(
+              textOutput("help_title", container = h4),
+              textOutput("help_display")
+            )),
+            width = 4
           ),
+          
           
           #view for country/data analysis
           mainPanel(
             #Javascript code acquried from StackOverflow; credit given to original author
+            #adapted for use in this program by AS
             tags$head(
               tags$style(
-                '#my_tooltip {
+                '#econ_tooltip {
                    position: absolute;
-                   width: 300px;
+                   width: 200px;
+                   z-index: 100;
+                   padding: 0;
+                 }
+                 #inq_tooltip {
+                   position: absolute;
+                   width: 120px;
                    z-index: 100;
                    padding: 0;
                  }'
@@ -106,24 +122,33 @@ ui <-
             ),
             tags$script(
               '$(document).ready(function() {
-                 // id of the plot (should change for each plot)
+                 // economic plot
                   $("#country_econ_plot").mousemove(function(e) {
-                  
                   // ID of uiOutput
-                  $("#my_tooltip").css({
-                    top: (e.offsetY + 5) + "px",             
-                    left: (e.offsetX + 5) + "px"
+                  $("#econ_tooltip").css({
+                    top: (e.offsetY - 45) + "px",             
+                    left: (e.offsetX + 20) + "px"
                   });
-                  $("#my_tooltip").show();
+                  $("#econ_tooltip").show();
+                });
+                
+                //inequality plot
+                $("#country_inq_plot").mousemove(function(e) {
+                  // ID of uiOutput
+                  $("#inq_tooltip").css({
+                    top: (e.offsetY + 355) + "px",             
+                    left: (e.offsetX + 20) + "px"
+                  });
+                  $("#inq_tooltip").show();
                 });
             });'
             ), 
-            uiOutput("my_tooltip"),
+            uiOutput("econ_tooltip"),
+            uiOutput("inq_tooltip"),
             plotOutput(outputId = "country_econ_plot", hover = "econ_hover", hoverDelay = 0),
             plotOutput(outputId = "country_inq_plot", hover = "inq_hover", hoverDelay = 0),
             verbatimTextOutput(outputId = "correlation_stats", placeholder = T)
-          ),
-          fluid = T
+          )
         )
       ),
       tabPanel("New Zealand's Impact")
@@ -131,7 +156,6 @@ ui <-
     title = "Trade Balance and Inequality: An Analysis",
     theme = shinytheme("sandstone")
   )
-
 
 
 
@@ -188,17 +212,19 @@ server <-
         #Then plot an interactive scatterplot using ggplot
         ggplot(data = inqplot, aes(x = inqplot[[1]], y = inqplot[[2]]), group = 1) +
           theme(text = element_text(family = "Arial", size = 16)) +
-          geom_point(shape = 15, color = "#0066CC", size = 5, show.legend = F) +
+          geom_point(shape = 17, color = "#0066CC", size = 5, show.legend = F) +
           geom_line(alpha = 0.5, color = "black", size = 0.5) +
-          scale_x_continuous(breaks = inqplot[[1]]) + 
+          scale_x_continuous(breaks = c(2008:2017), limits = c(2008,2017)) + 
           labs(
             x = "Year",
             y = input$inq_select
           )        
       })
     
-    #Render tooltips for graph hovering
-    output$my_tooltip <- renderUI({
+    #--------Render tooltips for graph hovering---------
+    
+    #Render Economic tooltip
+    output$econ_tooltip <- renderUI({
       #First formulate the data to plot
       plot_econdata <-
         econdata[, c("Country", gsub(" ", "_", input$econ_select))]
@@ -216,7 +242,7 @@ server <-
       req(nrow(y) != 0)
       verbatimTextOutput("econvals")
     })
-    output$econvals <- renderPrint({
+    output$econvals <- renderText({
       #First formulate the data to plot
       plot_econdata <-
         econdata[, c("Country", gsub(" ", "_", input$econ_select))]
@@ -230,11 +256,54 @@ server <-
       
       #Then do tooltip stuff
       hover <- input$econ_hover 
+      x <- nearPoints(econplot, input$econ_hover, xvar = "Year", yvar = gsub(" ", "_", input$econ_select))[1]
       y <- nearPoints(econplot, input$econ_hover, xvar = "Year", yvar = gsub(" ", "_", input$econ_select))[gsub(" ", "_", input$econ_select)]
       req(nrow(y) != 0)
-      y
+      
+      to_output <- paste("In ", x, ": ", y, sep = "")
+      to_output
     })  
     
+    #Render Inequality Tooltip
+    output$inq_tooltip <- renderUI({
+      #First formulate the data to plot
+      plot_inqdata <-
+        inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
+      plot_inqdata <-
+        plot_inqdata[plot_inqdata$Country == input$country_select, 2]
+      plot_inq_time <-
+        inqdata[inqdata$Country == input$country_select, "Year"]
+      
+      #represents the final formatting of the selected data
+      inqplot <- cbind(plot_inq_time, plot_inqdata)
+      
+      #Then do tooltip stuff
+      hover <- input$inq_hover
+      y <- nearPoints(inqplot, input$inq_hover, xvar = "Year", yvar = gsub(" ", "_", input$inq_select))[gsub(" ", "_", input$inq_select)]
+      req(nrow(y) != 0)
+      verbatimTextOutput("inqvals")
+    })
+    output$inqvals <- renderText({
+      #First formulate the data to plot
+      plot_inqdata <-
+        inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
+      plot_inqdata <-
+        plot_inqdata[plot_inqdata$Country == input$country_select, 2]
+      plot_inq_time <-
+        inqdata[inqdata$Country == input$country_select, "Year"]
+      
+      #represents the final formatting of the selected data
+      inqplot <- cbind(plot_inq_time, plot_inqdata)
+      
+      #Then do tooltip stuff
+      hover <- input$inq_hover
+      x <- nearPoints(inqplot, input$inq_hover, xvar = "Year", yvar = gsub(" ", "_", input$inq_select))[1]
+      y <- nearPoints(inqplot, input$inq_hover, xvar = "Year", yvar = gsub(" ", "_", input$inq_select))[gsub(" ", "_", input$inq_select)]
+      req(nrow(y) != 0)
+      
+      to_output <- paste("In ", x, ": ", y, sep = "")
+      to_output
+    })  
     
     #render statistical summary of country data
     output$correlation_stats <-

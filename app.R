@@ -91,12 +91,36 @@ ui <-
             width = 3
           ),
           
-          #Do analysis
-          
           #view for country/data analysis
           mainPanel(
-            plotOutput(outputId = "country_econ_plot"),
-            plotOutput(outputId = "country_inq_plot"),
+            #Javascript code acquried from StackOverflow; credit given to original author
+            tags$head(
+              tags$style(
+                '#my_tooltip {
+                   position: absolute;
+                   width: 300px;
+                   z-index: 100;
+                   padding: 0;
+                 }'
+              )
+            ),
+            tags$script(
+              '$(document).ready(function() {
+                 // id of the plot (should change for each plot)
+                  $("#country_econ_plot").mousemove(function(e) {
+                  
+                  // ID of uiOutput
+                  $("#my_tooltip").css({
+                    top: (e.offsetY + 5) + "px",             
+                    left: (e.offsetX + 5) + "px"
+                  });
+                  $("#my_tooltip").show();
+                });
+            });'
+            ), 
+            uiOutput("my_tooltip"),
+            plotOutput(outputId = "country_econ_plot", hover = "econ_hover", hoverDelay = 0),
+            plotOutput(outputId = "country_inq_plot", hover = "inq_hover", hoverDelay = 0),
             verbatimTextOutput(outputId = "correlation_stats", placeholder = T)
           ),
           fluid = T
@@ -104,8 +128,7 @@ ui <-
       ),
       tabPanel("New Zealand's Impact")
     ),
-    
-    title = "Trade Balance and Inequality; an Analysis",
+    title = "Trade Balance and Inequality: An Analysis",
     theme = shinytheme("sandstone")
   )
 
@@ -115,9 +138,11 @@ ui <-
 # --------FORMAT SERVER--------
 server <-
   function(input, output) {
+    
     #render economic plot
     output$country_econ_plot <-
       renderPlot({
+        
         #First formulate the data to plot
         plot_econdata <-
           econdata[, c("Country", gsub(" ", "_", input$econ_select))]
@@ -150,7 +175,6 @@ server <-
     output$country_inq_plot <-
       renderPlot({
         #First formulate the data to plot
-        
         plot_inqdata <-
           inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
         plot_inqdata <-
@@ -172,6 +196,45 @@ server <-
             y = input$inq_select
           )        
       })
+    
+    #Render tooltips for graph hovering
+    output$my_tooltip <- renderUI({
+      #First formulate the data to plot
+      plot_econdata <-
+        econdata[, c("Country", gsub(" ", "_", input$econ_select))]
+      plot_econdata <-
+        plot_econdata[plot_econdata$Country == input$country_select, 2]
+      plot_econ_time <-
+        econdata[econdata$Country == input$country_select, "Year"]
+      
+      #represents the final formatting of the selected data
+      econplot <- cbind(plot_econ_time, plot_econdata)
+      
+      #Then do tooltip stuff
+      hover <- input$econ_hover
+      y <- nearPoints(econplot, input$econ_hover, xvar = "Year", yvar = gsub(" ", "_", input$econ_select))[gsub(" ", "_", input$econ_select)]
+      req(nrow(y) != 0)
+      verbatimTextOutput("econvals")
+    })
+    output$econvals <- renderPrint({
+      #First formulate the data to plot
+      plot_econdata <-
+        econdata[, c("Country", gsub(" ", "_", input$econ_select))]
+      plot_econdata <-
+        plot_econdata[plot_econdata$Country == input$country_select, 2]
+      plot_econ_time <-
+        econdata[econdata$Country == input$country_select, "Year"]
+      
+      #represents the final formatting of the selected data
+      econplot <- cbind(plot_econ_time, plot_econdata)
+      
+      #Then do tooltip stuff
+      hover <- input$econ_hover 
+      y <- nearPoints(econplot, input$econ_hover, xvar = "Year", yvar = gsub(" ", "_", input$econ_select))[gsub(" ", "_", input$econ_select)]
+      req(nrow(y) != 0)
+      y
+    })  
+    
     
     #render statistical summary of country data
     output$correlation_stats <-

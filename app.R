@@ -1,16 +1,20 @@
-library(shiny)
-library(shinythemes)
 library(extrafont)
 library(ggplot2)
+library(shiny)
+library(shinythemes)
+library(tidyverse)
 
 #---------PRELIMINARY OPERATIONS FOR DISPLAY---------
 options(scipen = 999)
 extrafont::loadfonts(device = "win")
 
 # --------PRELIMINARY OPERATIONS--------
-#icon used in "Help" buttons
+#icon used in "Help" buttons (since removed)
 helpicon <-
   icon("question-circle", class = NULL, lib = "font-awesome")
+
+#dataframe used in "help" button presses
+measure_descr <- read_csv(paste(address, "project_metadata.csv", sep = ""))
 
 #available options for selecting country-by-country data
 country_selection <- unique(econdata$Country)
@@ -38,7 +42,7 @@ ui <-
         sidebarLayout(
           #Data selection for country/data analysis
           sidebarPanel(
-            #Country select (and help button)
+            #Country select
             h4("Data Selection"),
             
             inputPanel(
@@ -61,11 +65,9 @@ ui <-
                 selectize = T
               ),
               actionButton(
-                inputId = "econ_help",
-                label = "",
-                icon = helpicon
+                inputId = "help_econ",
+                label = "What does this mean?",
               )
-              
             ),
             
             #Inequality data select (and help button)
@@ -78,11 +80,13 @@ ui <-
                 selectize = T
               ),
               actionButton(
-                inputId = "inq_help",
-                label = "",
-                icon = helpicon
+                inputId = "help_inq",
+                label = "What does this mean?",
               )
             ),
+            
+            #Output panels for help buttons
+            inputPanel(textOutput("help_title", container = h4), textOutput("help_display", container = h5)),
             
             width = 3
           ),
@@ -174,6 +178,28 @@ server <-
       renderText({
         "PLACEHOLDER; STATISTICAL SUMMARY WILL BE DISPLAYED HERE."
       })
+    
+    #render descriptive text when help buttons are pressed
+    help_title_text <- reactiveValues(text = "")
+    help_display_text <- reactiveValues(text = "")
+    
+    observeEvent(input$help_inq, {
+      help_title_text$text <- input$inq_select
+      help_display_text$text <- unlist(measure_descr[measure_descr$Measure == input$inq_select, 2])
+    })
+    
+    observeEvent(input$help_econ, {
+      help_title_text$text <- input$econ_select
+      help_display_text$text <- unlist(measure_descr[measure_descr$Measure == input$econ_select, 2])
+    })
+    
+    output$help_title <- renderText({
+      help_title_text$text
+    })
+    
+    output$help_display <- renderText({
+      help_display_text$text
+    })
   }
 
 

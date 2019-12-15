@@ -1,5 +1,7 @@
 library(extrafont)
 library(ggplot2)
+library(leaflet)
+library(rgdal)
 library(shiny)
 library(shinythemes)
 library(tidyverse)
@@ -92,7 +94,7 @@ ui <-
             )),
             
             #Output panels for help buttons
-            inputPanel(verticalLayout(
+            conditionalPanel(condition = "input.help_econ%2 == 1 || input.help_inq%2 == 1", verticalLayout(
               textOutput("help_title", container = h4),
               textOutput("help_display")
             )),
@@ -151,8 +153,13 @@ ui <-
           )
         )
       ),
-      tabPanel("New Zealand's Impact")
-    ),
+      tabPanel("New Zealand's Impact",
+               verticalLayout(
+                 headerPanel(title = "New Zealand's Trade and Inequality"),
+                 textOutput(outputId = "nz_descr"),
+                 leafletOutput(outputId = "nz_map")
+               ))
+    ), 
     title = "Trade Balance and Inequality: An Analysis",
     theme = shinytheme("sandstone")
   )
@@ -188,7 +195,7 @@ server <-
             x = "Year",
             y = paste(
               input$econ_select,
-              "(millions USD)",
+              "(million USD)",
               sep = " "
             )
           ) +
@@ -332,6 +339,82 @@ server <-
     output$help_display <- renderText({
       help_display_text$text
     })
+    
+    #render NZ-centric panel, including text & leaflet map
+    output$nz_descr<- renderText({
+      "description"
+    })
+    output$nz_map <- renderLeaflet({
+      #setup the map bounds and groups
+      m <- geojsonio::geojson_read("C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/project_material/mapdata/countries.geo.json", what = "sp")
+      ydatam <- m[m$id %in% inqdata$Country_code[inqdata$Country_code != "AGO" & inqdata$Country_code != "GNB"], ]
+      ndatam <- m[m$id %in% inqdata$Country_code[inqdata$Country_code == "AGO" | inqdata$Country_code == "GNB"], ]
+      nzdatam <- m[m$id == "NZL", ]
+      
+      #Begin rendering map object
+      map <- leaflet(options =leafletOptions(minZoom = 1, maxZoom = 5)) %>%
+        addProviderTiles(providers$CartoDB.VoyagerNoLabels) %>%
+        
+        #render country borders (with data); due to nature of data set, Comoros, Sao Tome and Principe, and Tuvalu are not rendered
+        addPolygons(
+          data = ydatam,
+          fillColor = "#FFF333",
+          weight = 1,
+          popup = paste0("<h4><strong>", ydatam$name, "</strong></h4>"),
+          opacity = 1,
+          color = 'black',
+          dashArray = '0',
+          fillOpacity = 0.5,
+          highlight = highlightOptions(
+            weight = 5,
+            color = "#666",
+            dashArray = "",
+            fillOpacity = 0.7,
+            bringToFront = TRUE
+          )
+        ) %>%
+        #render country borders (w/out data); due to nature of data set, Comoros, Sao Tome and Principe, and Tuvalu are not rendered
+        addPolygons(
+          data = ndatam,
+          fillColor = "#A0A0A0",
+          weight = 1,
+          popup = paste0("<h4><strong>", ndatam$name, "</strong></h4>"),
+          opacity = 1,
+          color = 'black',
+          dashArray = '0',
+          fillOpacity = 0.5,
+          highlight = highlightOptions(
+            weight = 5,
+            color = "#666",
+            dashArray = "",
+            fillOpacity = 0.7,
+            bringToFront = TRUE
+          )
+        ) %>%
+        #render NZ borders for the fun of it
+        addPolygons(
+          data = nzdatam,
+          fillColor = "#66B2FF",
+          weight = 1,
+          popup = paste0("<h4><strong>New Zealand</strong></h4>"),
+          opacity = 1,
+          color = 'black',
+          dashArray = '0',
+          fillOpacity = 0.5,
+          highlight = highlightOptions(
+            weight = 5,
+            color = "#666",
+            dashArray = "",
+            fillOpacity = 0.7,
+            bringToFront = TRUE
+          )
+        )
+      
+      #return finished map object
+      map
+    })
+    
+    
   }
 
 

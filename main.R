@@ -210,16 +210,17 @@ nzdata <-
   )
 colnames(nzdata) <-
   c("Country",
-    "Trade_balance_(1000_US$)",
-    "Exports_(1000_US$)",
-    "Imports_(1000_US$)")
+    "Trade_balance_(thousand_USD)",
+    "Exports_(thousand_USD)",
+    "Imports_(thousand_USD)")
 
 #remove all countries this analysis isn't concerned with
 nzdata <-
   nzdata[(
     nzdata$Country %in% append(unique(inqdata$Country), c("East Timor", "Yemen"))
   ), ]
-#Unfortunately trade data between New Zealand and Angola, Comoros, and Guinea-Bissau is unavailable; these countries have been removed from this section
+#Unfortunately trade data between New Zealand and Angola, Comoros, and Guinea-Bissau is unavailable; 
+#these countries are not present in this section of the analysis.
 
 #Lastly write this data to a formatted file
 write_csv(

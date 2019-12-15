@@ -1,4 +1,4 @@
-Country,Trade_balance_(1000_US$),Exports_(1000_US$),Imports_(1000_US$)
+Country,Trade_balance_(thousand_USD),Exports_(thousand_USD),Imports_(thousand_USD)
 Afghanistan,197.1,269.83,72.73
 Burundi,NA,NA,13.17
 Benin,839.66,840.54,0.88

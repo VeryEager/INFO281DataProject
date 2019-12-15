@@ -149,7 +149,12 @@ ui <-
             uiOutput("inq_tooltip"),
             plotOutput(outputId = "country_econ_plot", hover = "econ_hover", hoverDelay = 0),
             plotOutput(outputId = "country_inq_plot", hover = "inq_hover", hoverDelay = 0),
-            verbatimTextOutput(outputId = "correlation_stats", placeholder = T)
+            inputPanel(
+                      verticalLayout(
+                       h3("Selection Statistics"), 
+                       textOutput(outputId = "econ_stats"),
+                       textOutput(outputId = "inq_stats"),
+                       textOutput(outputId = "correlation_stats")))
           )
         )
       ),
@@ -173,17 +178,8 @@ server <-
     #render economic plot
     output$country_econ_plot <-
       renderPlot({
-        
-        #First formulate the data to plot
-        plot_econdata <-
-          econdata[, c("Country", gsub(" ", "_", input$econ_select))]
-        plot_econdata <-
-          plot_econdata[plot_econdata$Country == input$country_select, 2]
-        plot_econ_time <-
-          econdata[econdata$Country == input$country_select, "Year"]
-        
-        #represents the final formatting of the selected data
-        econplot <- cbind(plot_econ_time, plot_econdata)
+        #Formulate data to be plotted
+        econplot <- formulate.econ.data(input)
         
         #Then plot an interactive scatterplot using ggplot
         ggplot(data = econplot, aes(x = econplot[[1]], y = econplot[[2]], color = econplot[[2]]), group = 1) +
@@ -205,16 +201,8 @@ server <-
     #render inequality plot
     output$country_inq_plot <-
       renderPlot({
-        #First formulate the data to plot
-        plot_inqdata <-
-          inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
-        plot_inqdata <-
-          plot_inqdata[plot_inqdata$Country == input$country_select, 2]
-        plot_inq_time <-
-          inqdata[inqdata$Country == input$country_select, "Year"]
-        
-        #represents the final formatting of the selected data
-        inqplot <- cbind(plot_inq_time, plot_inqdata)
+        #Formulate data to be plotted
+        inqplot <- formulate.inq.data(input)
         
         #Then plot an interactive scatterplot using ggplot
         ggplot(data = inqplot, aes(x = inqplot[[1]], y = inqplot[[2]]), group = 1) +
@@ -229,19 +217,10 @@ server <-
       })
     
     #--------Render tooltips for graph hovering---------
-    
     #Render Economic tooltip
     output$econ_tooltip <- renderUI({
-      #First formulate the data to plot
-      plot_econdata <-
-        econdata[, c("Country", gsub(" ", "_", input$econ_select))]
-      plot_econdata <-
-        plot_econdata[plot_econdata$Country == input$country_select, 2]
-      plot_econ_time <-
-        econdata[econdata$Country == input$country_select, "Year"]
-      
-      #represents the final formatting of the selected data
-      econplot <- cbind(plot_econ_time, plot_econdata)
+      #Formulate data to be plotted
+      econplot <- formulate.econ.data(input)
       
       #Then do tooltip stuff
       hover <- input$econ_hover
@@ -250,16 +229,8 @@ server <-
       verbatimTextOutput("econvals")
     })
     output$econvals <- renderText({
-      #First formulate the data to plot
-      plot_econdata <-
-        econdata[, c("Country", gsub(" ", "_", input$econ_select))]
-      plot_econdata <-
-        plot_econdata[plot_econdata$Country == input$country_select, 2]
-      plot_econ_time <-
-        econdata[econdata$Country == input$country_select, "Year"]
-      
-      #represents the final formatting of the selected data
-      econplot <- cbind(plot_econ_time, plot_econdata)
+      #Formulate data to be plotted
+      econplot <- formulate.econ.data(input)
       
       #Then do tooltip stuff
       hover <- input$econ_hover 
@@ -273,16 +244,8 @@ server <-
     
     #Render Inequality Tooltip
     output$inq_tooltip <- renderUI({
-      #First formulate the data to plot
-      plot_inqdata <-
-        inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
-      plot_inqdata <-
-        plot_inqdata[plot_inqdata$Country == input$country_select, 2]
-      plot_inq_time <-
-        inqdata[inqdata$Country == input$country_select, "Year"]
-      
-      #represents the final formatting of the selected data
-      inqplot <- cbind(plot_inq_time, plot_inqdata)
+      #Formulate data to be plotted
+      inqplot <- formulate.inq.data(input)
       
       #Then do tooltip stuff
       hover <- input$inq_hover
@@ -290,17 +253,11 @@ server <-
       req(nrow(y) != 0)
       verbatimTextOutput("inqvals")
     })
+    
+    #Render Inequality Tooltip text
     output$inqvals <- renderText({
-      #First formulate the data to plot
-      plot_inqdata <-
-        inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
-      plot_inqdata <-
-        plot_inqdata[plot_inqdata$Country == input$country_select, 2]
-      plot_inq_time <-
-        inqdata[inqdata$Country == input$country_select, "Year"]
-      
-      #represents the final formatting of the selected data
-      inqplot <- cbind(plot_inq_time, plot_inqdata)
+      #Formulate data to be plotted
+      inqplot <- formulate.inq.data(input)
       
       #Then do tooltip stuff
       hover <- input$inq_hover
@@ -312,12 +269,22 @@ server <-
       to_output
     })  
     
+    #--------Render Statistical Summary--------
     #render statistical summary of country data
+    output$econ_stats <-
+      renderText({
+        "ECON PLACEHOLDER"
+      })
+    output$inq_stats <-
+      renderText({
+        "INQ PLACEHOLDER"
+      })
     output$correlation_stats <-
       renderText({
-        "PLACEHOLDER; STATISTICAL SUMMARY WILL BE DISPLAYED HERE."
+        "CORRELATION PLACEHOLDER"
       })
     
+    #--------Render Help Text--------
     #render descriptive text when help buttons are pressed
     help_title_text <- reactiveValues(text = "")
     help_display_text <- reactiveValues(text = "")
@@ -340,6 +307,7 @@ server <-
       help_display_text$text
     })
     
+    #--------Render NZ Page and Map--------
     #render NZ-centric panel, including text & leaflet map
     output$nz_descr<- renderText({
       "description"
@@ -348,25 +316,29 @@ server <-
       #setup the map bounds and groups
       m <- geojsonio::geojson_read("C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/project_material/mapdata/countries.geo.json", what = "sp")
       ydatam <- m[m$id %in% inqdata$Country_code[inqdata$Country_code != "AGO" & inqdata$Country_code != "GNB"], ]
+      ydatam <- ydatam[order(ydatam$id), ]
       ndatam <- m[m$id %in% inqdata$Country_code[inqdata$Country_code == "AGO" | inqdata$Country_code == "GNB"], ]
+      
       nzdatam <- m[m$id == "NZL", ]
       
       #Begin rendering map object
-      map <- leaflet(options =leafletOptions(minZoom = 1, maxZoom = 5)) %>%
+      map <- leaflet(options =leafletOptions(minZoom = 2, maxZoom = 5)) %>%
         addProviderTiles(providers$CartoDB.VoyagerNoLabels) %>%
         
         #render country borders (with data); due to nature of data set, Comoros, Sao Tome and Principe, and Tuvalu are not rendered
         addPolygons(
           data = ydatam,
-          fillColor = "#FFF333",
+          fillColor = generate.map.fill(ydatam$id, ydatam),
           weight = 1,
-          popup = paste0("<h4><strong>", ydatam$name, "</strong></h4>"),
+          #The popup requries the data be 'reversed' from NZ's perspective (ie, "Exports to *country*" becomes "Imports from NZ")
+          popup = generate.map.text(ydatam$id, ydatam),
           opacity = 1,
-          color = 'black',
+          color = 'black', 
           dashArray = '0',
           fillOpacity = 0.5,
           highlight = highlightOptions(
-            weight = 5,
+            fillColor = generate.map.highlight(ydatam$id, ydatam), 
+            weight = 2.5,
             color = "#666",
             dashArray = "",
             fillOpacity = 0.7,
@@ -376,15 +348,16 @@ server <-
         #render country borders (w/out data); due to nature of data set, Comoros, Sao Tome and Principe, and Tuvalu are not rendered
         addPolygons(
           data = ndatam,
-          fillColor = "#A0A0A0",
+          fillColor = generate.map.fill(ndatam$id, ndatam),
           weight = 1,
-          popup = paste0("<h4><strong>", ndatam$name, "</strong></h4>"),
+          popup = generate.map.text(ndatam$id, ndatam),
           opacity = 1,
           color = 'black',
           dashArray = '0',
           fillOpacity = 0.5,
           highlight = highlightOptions(
-            weight = 5,
+            fillColor = generate.map.highlight(ndatam$id, ndatam),
+            weight = 2.5,
             color = "#666",
             dashArray = "",
             fillOpacity = 0.7,
@@ -394,15 +367,16 @@ server <-
         #render NZ borders for the fun of it
         addPolygons(
           data = nzdatam,
-          fillColor = "#66B2FF",
+          fillColor = generate.map.fill("NZL", nzdata),
           weight = 1,
-          popup = paste0("<h4><strong>New Zealand</strong></h4>"),
+          popup = generate.map.text("NZL", nzdata),
           opacity = 1,
           color = 'black',
           dashArray = '0',
           fillOpacity = 0.5,
           highlight = highlightOptions(
-            weight = 5,
+            fillColor = generate.map.highlight("NZL", nzdata),
+            weight = 2.5,
             color = "#666",
             dashArray = "",
             fillOpacity = 0.7,
@@ -413,11 +387,104 @@ server <-
       #return finished map object
       map
     })
-    
-    
   }
 
+#--------FUNCTIONS--------
+#Formulates inqeuality data for display in tooltips & graphs of Country page
+formulate.inq.data <- function(input) {
+  #First formulate the data to plot
+  plot_inqdata <-
+    inqdata[, c("Country", gsub(" ", "_", input$inq_select))]
+  plot_inqdata <-
+    plot_inqdata[plot_inqdata$Country == input$country_select, 2]
+  plot_inq_time <-
+    inqdata[inqdata$Country == input$country_select, "Year"]
+  
+  #represents the final formatting of the selected data
+  inqplot <- cbind(plot_inq_time, plot_inqdata)
+}
 
+#Formulates economic data for display in tooltips & graphs of Country page
+formulate.econ.data <- function(input) {
+  #First formulate the data to plot
+  plot_econdata <-
+    econdata[, c("Country", gsub(" ", "_", input$econ_select))]
+  plot_econdata <-
+    plot_econdata[plot_econdata$Country == input$country_select, 2]
+  plot_econ_time <-
+    econdata[econdata$Country == input$country_select, "Year"]
+  
+  #represents the final formatting of the selected data
+  econplot <- cbind(plot_econ_time, plot_econdata)
+}
+
+#Generates the label text on the leaflet map given the presence or lack of data related to a country
+generate.map.text <- function(country_id, data){
+  print(country_id)
+  #For nations with data
+  if(country_id %in% nzdata$codes){
+    text <- paste0(
+      "<strong>",
+      data$name,
+      "</strong><br/><div>Imports from NZ: <font color = \"blue\" face = \"helvetica\">",
+      nzdata[data$id == nzdata$codes, "Exports_(thousand_USD)"],
+      "</div></font><br/><div>Exports to NZ: <font color = \"blue\" face = \"helvetica\">",
+      nzdata[data$id == nzdata$codes, "Imports_(thousand_USD)"],
+      "</div></font><br/><div>Trade Balance with NZ: <strong><font color = \"blue\" face = \"helvetica\">",
+      (nzdata[data$id == nzdata$codes, "Trade_balance_(thousand_USD)"] *
+         -1),
+      "</div></font></strong>"
+    )
+  }
+  #For NZ
+  else if (country_id == "NZL") {
+    text <-
+      paste0(
+        "<h4><strong>New Zealand</strong></h4><br/><div>Total Imports: <font color = \"#00B200\" face = \"helvetica\">",
+        sum(nzdata[, "Imports_(thousand_USD)"], na.rm = T),
+        "</font></div><br/><div>Total Exports: <font color = \"#00B200\" face = \"helvetica\">",
+        sum(nzdata[, "Exports_(thousand_USD)"], na.rm = T),
+        "</font></div><br/><div>Aggregate Trade Balance: <strong><font color = \"00B200\" face = \"helvetica\">",
+        sum(nzdata[, "Trade_balance_(thousand_USD)"], na.rm = T),
+        "</div></font></strong>"
+      )
+  }
+  #For nations without data
+  else{
+    text <- paste0("<strong>", data$name, "</strong><br/><div>No trade data available.</div>")
+  }
+  text
+}
+
+#Generates the fill color for a country on the leaflet map
+generate.map.fill <- function(country_id, data){
+  if(country_id %in% nzdata$codes){
+    fill <- "#FFF333"
+  }
+  else if(country_id == "NZL"){
+    fill <- "#3a8de0"
+  }
+  else{
+    fill <- "#A0A0A0"
+  }
+  
+  fill
+}
+
+#Generates the highlight color for a country on the leaflet map
+generate.map.highlight <- function(country_id, data){
+  if(country_id %in% nzdata$codes){
+    fill <- "#bfb615"
+  }
+  else if(country_id == "NZL"){
+    fill <- "#66B2FF"
+  }
+  else{
+    fill <- "#8f8f8f"
+  }
+  
+  fill
+}
 
 # --------RUN APPLICATION--------
 shinyApp(ui = ui, server = server)

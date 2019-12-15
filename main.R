@@ -214,13 +214,23 @@ colnames(nzdata) <-
     "Exports_(thousand_USD)",
     "Imports_(thousand_USD)")
 
-#remove all countries this analysis isn't concerned with
+#remove all countries this analysis isn't concerned with, and rename them appropriately (if there are any issues)
 nzdata <-
   nzdata[(
     nzdata$Country %in% append(unique(inqdata$Country), c("East Timor", "Yemen"))
   ), ]
+nzdata[nzdata$Country == "East Timor", 1] <- "Timor-Leste"
+
 #Unfortunately trade data between New Zealand and Angola, Comoros, and Guinea-Bissau is unavailable; 
 #these countries are not present in this section of the analysis.
+
+#add 3-letter country codes (used later for the leaflet map) and remove countries with no NZ trade data and map projection
+nzdata <- nzdata[order(nzdata$Country),]
+codes <- unique(inqdata$Country_code)
+codes <- codes[!( codes %in% c("AGO", "COM", "GNB"))]
+nzdata <- cbind(nzdata, codes)
+nzdata <- nzdata[order(nzdata$codes), ]
+nzdata <- nzdata[!(nzdata$codes %in% c("STP", "TUV")), ]
 
 #Lastly write this data to a formatted file
 write_csv(

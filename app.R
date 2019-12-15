@@ -322,7 +322,7 @@ server <-
       nzdatam <- m[m$id == "NZL", ]
       
       #Begin rendering map object
-      map <- leaflet(options =leafletOptions(minZoom = 2, maxZoom = 5)) %>%
+      map <- leaflet(options =leafletOptions(minZoom = 3, maxZoom = 5)) %>%
         addProviderTiles(providers$CartoDB.VoyagerNoLabels) %>%
         
         #render country borders (with data); due to nature of data set, Comoros, Sao Tome and Principe, and Tuvalu are not rendered
@@ -420,7 +420,6 @@ formulate.econ.data <- function(input) {
 
 #Generates the label text on the leaflet map given the presence or lack of data related to a country
 generate.map.text <- function(country_id, data){
-  print(country_id)
   #For nations with data
   if(country_id %in% nzdata$codes){
     text <- paste0(

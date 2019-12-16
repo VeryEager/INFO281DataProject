@@ -152,9 +152,9 @@ ui <-
             inputPanel(
                       verticalLayout(
                        h3("Selection Statistics"), 
-                       textOutput(outputId = "econ_stats"),
-                       textOutput(outputId = "inq_stats"),
-                       textOutput(outputId = "correlation_stats")))
+                       uiOutput(outputId = "econ_stats"),
+                       uiOutput(outputId = "inq_stats"),
+                       uiOutput(outputId = "correlation_stats")))
           )
         )
       ),
@@ -270,15 +270,21 @@ server <-
     })  
     
     #--------Render Statistical Summary--------
-    #render statistical summary of country data
+    #render statistical summary of selected economic data
     output$econ_stats <-
       renderText({
-        "ECON PLACEHOLDER"
+        textdata <- formulate.econ.data(input)
+        generate.stats(textdata, input, "econ")
       })
+    
+    #render statistical summary of selected inequality data
     output$inq_stats <-
       renderText({
-        "INQ PLACEHOLDER"
+        textdata <- formulate.inq.data(input)
+        generate.stats(textdata, input, "inq")
       })
+    
+    #render correlation statistics
     output$correlation_stats <-
       renderText({
         "CORRELATION PLACEHOLDER"
@@ -485,5 +491,68 @@ generate.map.highlight <- function(country_id, data){
   fill
 }
 
+#Generates the text to display for statistics on the country page
+generate.stats <- function(textdata, input, display) {
+  if (display == "econ") {
+    paste0(
+      "<h4>",
+      input$econ_select,
+      #Display Maximum
+      "</h4><div> Maximum: <font color = \"blue\" face = \"helvetica\">",
+      round(max(textdata[[2]], na.rm = T), digits = 3),
+      "</font> (<font color = \"green\" face = \"helvetica\">",
+      textdata[which.max(textdata[[2]]), "Year"],
+      "</font>)<br/>",
+      #Display Mean
+      "Mean: <font color = \"blue\" face = \"helvetica\">",
+      round(mean(textdata[[2]], na.rm = T), digits = 3),
+      "</font><br/>",
+      #Display Minimum
+      "Minimum: <font color = \"blue\" face = \"helvetica\">",
+      round(min(textdata[[2]], na.rm = T), digits = 3),
+      "</font> (<font color = \"green\" face = \"helvetica\">",
+      textdata[which.min(textdata[[2]]), "Year"],
+      "</font>)<br/>",
+      #Display SD
+      "Standard Deviation: <font color = \"blue\" face = \"helvetica\">",
+      round(sd(textdata[[2]], na.rm = T), digits = 3),
+      "</font><br/>",
+      #Display Variance
+      "Variance: <font color = \"blue\" face = \"helvetica\">",
+      round(var(textdata[[2]], na.rm = T), digits = 3),
+      "</font></div>"
+    )
+  }
+  else{
+    paste0(
+      "<h4>",
+      input$inq_select,
+      #Display Maximum
+      "</h4><div> Maximum: <font color = \"blue\" face = \"helvetica\">",
+      round(max(textdata[[2]], na.rm = T), digits = 3),
+      "</font> (<font color = \"green\" face = \"helvetica\">",
+      textdata[which.max(textdata[[2]]), "Year"],
+      "</font>)<br/>",
+      #Display Mean
+      "Mean: <font color = \"blue\" face = \"helvetica\">",
+      round(mean(textdata[[2]], na.rm = T), digits = 3),
+      "</font><br/>",
+      #Display Minimum
+      "Minimum: <font color = \"blue\" face = \"helvetica\">",
+      round(min(textdata[[2]], na.rm = T), digits = 3),
+      "</font> (<font color = \"green\" face = \"helvetica\">",
+      textdata[which.min(textdata[[2]]), "Year"],
+      "</font>)<br/>",
+      #Display SD
+      "Standard Deviation: <font color = \"blue\" face = \"helvetica\">",
+      round(sd(textdata[[2]], na.rm = T), digits = 3),
+      "</font><br/>",
+      #Display Variance
+      "Variance: <font color = \"blue\" face = \"helvetica\">",
+      round(var(textdata[[2]], na.rm = T), digits = 3),
+      "</font></div>"
+    )
+  }
+}
 # --------RUN APPLICATION--------
 shinyApp(ui = ui, server = server)

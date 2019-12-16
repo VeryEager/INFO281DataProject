@@ -243,3 +243,12 @@ write_csv(
 )
 
 #--------PERFORM ANALYSIS ON DATA--------
+aggrdata <- merge(econdata, inqdata[, -2], by = c("Country", "Year"))
+
+#Use Kendall Correlation: Kendall rank correlation (non-parametric) is an alternative to Pearson’s correlation (parametric) 
+#when the data you’re working with has failed one or more assumptions of the test. This is also the best alternative to Spearman 
+#correlation (non-parametric) when your sample size is small and has many tied ranks.
+psych::corr.test(aggrdata[c(32, 35)], method = "kendall")
+
+
+#now do this for all combos.

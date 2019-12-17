@@ -248,7 +248,26 @@ aggrdata <- merge(econdata, inqdata[, -2], by = c("Country", "Year"))
 #Use Kendall Correlation: Kendall rank correlation (non-parametric) is an alternative to Pearson’s correlation (parametric) 
 #when the data you’re working with has failed one or more assumptions of the test. This is also the best alternative to Spearman 
 #correlation (non-parametric) when your sample size is small and has many tied ranks.
-psych::corr.test(aggrdata[c(32, 35)], method = "kendall")
+
+#Find p-values AND r-values of each possible pairing of inequality/economic indicators
+p_corrdata <- data.frame(Economic_indicator = character(length = 10),
+                         GINI_index = integer(length = 10))
+p_corrdata$Economic_indicator <- colnames(aggrdata[23:32])
+
+p_corrdata$GINI_index <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["GINI_index"], method = "kendall")$p, digits = 3)})
+p_corrdata$"Income_share_held_by_top_10%"<- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Income_share_held_by_top_10%"], method = "kendall")$p, digits = 3)})
+p_corrdata$"Poverty_headcount_ratio_%_(at_national_lines)" <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Poverty_headcount_ratio_%_(at_national_lines)"], method = "kendall")$p, digits = 3)})
 
 
-#now do this for all combos.
+r_corrdata <- data.frame(Economic_indicator = character(length = 10),
+                         GINI_index = integer(length = 10))
+r_corrdata$Economic_indicator <- colnames(aggrdata[23:32])
+r_corrdata$GINI_index <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["GINI_index"], method = "kendall")$r, digits = 3)})
+r_corrdata$"Income_share_held_by_top_10%"<- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Income_share_held_by_top_10%"], method = "kendall")$r, digits = 3)})
+r_corrdata$"Poverty_headcount_ratio_%_(at_national_lines)" <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Poverty_headcount_ratio_%_(at_national_lines)"], method = "kendall")$r, digits = 3)})

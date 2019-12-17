@@ -38,69 +38,149 @@ ui <-
   fluidPage(
     tabsetPanel(
       #Country Analysis tab
-      tabPanel("Overview"),
-      tabPanel(
-        "Country Exploration",
+      tabPanel("Overview",
+               verticalLayout(
+                 sidebarLayout(
+                   sidebarPanel(
+                     h4("Data Selection"),
+                     uiOutput(outputId = "ov_sidebar_descr"),
+                     
+                     #Economic indicator selection for the overview screen
+                     inputPanel(
+                       selectInput(
+                         inputId = "ov_econ_select",
+                         "Economic Indicator",
+                         choices = econ_selection[grepl("net", econ_selection, ignore.case = T) |
+                                                    grepl("balance", econ_selection, ignore.case = T)],
+                         multiple = FALSE,
+                         selectize = T,
+                         width = "180px"
+                       )
+                     ),
+                     
+                     #Inequality indicator selection for the overview screen
+                     inputPanel(
+                       selectInput(
+                         inputId = "ov_inq_select",
+                         "Inequality Indicator",
+                         choices = inq_selection,
+                         multiple = FALSE,
+                         selectize = T,
+                         width = "180px"
+                       )
+                     ),
+                     
+                     #Data on the correlation between the selection
+                     uiOutput(outputId = "ov_corr_descr"),
+                     width = 4
+                   ),
+                   mainPanel(
+                     #GGPlot which displays the correlation between the data, with an additional tooltip
+                     tags$head(
+                       tags$style(
+                         '#corr_tooltip {
+                            position: absolute;
+                             width: 200px;
+                            z-index: 100;
+                             padding: 0;
+                           }'
+                       )
+                     ),
+                     tags$script(
+                       '$(document).ready(function() {
+                         // correlation plot
+                         $("#ov_plot").mousemove(function(e) {
+                         // ID of uiOutput
+                         $("#corr_tooltip").css({
+                            top: (e.offsetY - 45) + "px",
+                            left: (e.offsetX + 20) + "px"
+                            });
+                          $("#corr_tooltip").show();
+                     });'),
+                     plotOutput(outputId = "ov_plot", hover = "corr_hover", hoverDelay = 0)
+                   )
+                 ),
+                 hr(),
+                 
+                 sidebarLayout(
+                   sidebarPanel(
+                     #Summary of the correlations; describe general patterns
+                     uiOutput(outputId = "ov_summary"),
+                     width = 5),
+                   mainPanel(
+                     #Buttons for choosing variable displayed on the table
+                     inputPanel(radioButtons(
+                       inputId = "table_val",
+                       "Selected Statistic: ",
+                       choices = c("P-value", "R-value")
+                     )), 
+                     #Table displaying correlation statistic for all combos.
+                     DT::dataTableOutput(outputId = "ov_table"),
+                     width = 7
+                     
+                   )
+                 )
+               )),
+      tabPanel("Country Exploration", 
         #Viewing and manipulating country analysis
         sidebarLayout(
           #Data selection for country/data analysis
-          sidebarPanel(
-            #Country select
-            h4("Data Selection"),
-            
-            inputPanel(
-              selectInput(
-                inputId = "country_select",
-                "Country",
-                choices = country_selection,
-                multiple = FALSE,
-                selectize = ,
-                width = "180px"
-              )
+            sidebarPanel(
+              #Country select
+              h4("Data Selection"),
+              
+              inputPanel(
+                selectInput(
+                  inputId = "country_select",
+                  "Country",
+                  choices = country_selection,
+                  multiple = FALSE,
+                  selectize = T,
+                  width = "180px"
+                )
+              ),
+              
+              #Economic data select (and help button)
+              inputPanel(verticalLayout(
+                selectInput(
+                  inputId = "econ_select",
+                  "Economic Indicator",
+                  choices = econ_selection,
+                  multiple = FALSE,
+                  selectize = T,
+                  width = "180px"
+                ),
+                actionButton(
+                  inputId = "help_econ",
+                  label = "What does this mean?",
+                  style = 'padding:4px; font-size:80%'
+                )
+              )),
+              
+              #Inequality data select (and help button)
+              inputPanel(verticalLayout(
+                selectInput(
+                  inputId = "inq_select",
+                  "Inequality Indicator",
+                  choices = inq_selection,
+                  multiple = FALSE,
+                  selectize = T,
+                  width = "180px"
+                ),
+                actionButton(
+                  inputId = "help_inq",
+                  label = "What does this mean?",
+                  style = 'padding:4px; font-size:80%'
+                )
+              )),
+              
+              #Output panels for help buttons
+              conditionalPanel(condition = "input.help_econ%2 == 1 || input.help_inq%2 == 1", verticalLayout(
+                textOutput("help_title", container = h4),
+                textOutput("help_display")
+              )),
+              width = 4
             ),
-            
-            #Economic data select (and help button)
-            inputPanel(verticalLayout(
-              selectInput(
-                inputId = "econ_select",
-                "Economic Indicator",
-                choices = econ_selection,
-                multiple = FALSE,
-                selectize = T,
-                width = "180px"
-              ),
-              actionButton(
-                inputId = "help_econ",
-                label = "What does this mean?",
-                style = 'padding:4px; font-size:80%'
-              )
-            )),
-            
-            #Inequality data select (and help button)
-            inputPanel(verticalLayout(
-              selectInput(
-                inputId = "inq_select",
-                "Inequality Indicator",
-                choices = inq_selection,
-                multiple = FALSE,
-                selectize = T,
-                width = "180px"
-              ),
-              actionButton(
-                inputId = "help_inq",
-                label = "What does this mean?",
-                style = 'padding:4px; font-size:80%'
-              )
-            )),
-            
-            #Output panels for help buttons
-            conditionalPanel(condition = "input.help_econ%2 == 1 || input.help_inq%2 == 1", verticalLayout(
-              textOutput("help_title", container = h4),
-              textOutput("help_display")
-            )),
-            width = 4
-          ),
-          
           
           #view for country/data analysis
           mainPanel(
@@ -149,12 +229,13 @@ ui <-
             uiOutput("inq_tooltip"),
             plotOutput(outputId = "country_econ_plot", hover = "econ_hover", hoverDelay = 0),
             plotOutput(outputId = "country_inq_plot", hover = "inq_hover", hoverDelay = 0),
-            inputPanel(
-                      verticalLayout(
-                       h3("Selection Statistics"), 
-                       uiOutput(outputId = "econ_stats"),
-                       uiOutput(outputId = "inq_stats"),
-                       uiOutput(outputId = "correlation_stats")))
+            sidebarPanel(verticalLayout(
+              h3("Statistics on Selected Data"),
+              flowLayout(
+                uiOutput(outputId = "econ_stats"),
+                uiOutput(outputId = "inq_stats")
+              )
+            ), width = 12)
           )
         )
       ),
@@ -162,6 +243,7 @@ ui <-
                verticalLayout(
                  headerPanel(title = "New Zealand's Trade and Inequality"),
                  textOutput(outputId = "nz_descr"),
+                 hr(),
                  leafletOutput(outputId = "nz_map")
                ))
     ), 
@@ -284,12 +366,6 @@ server <-
         generate.stats(textdata, input, "inq")
       })
     
-    #render correlation statistics
-    output$correlation_stats <-
-      renderText({
-        "CORRELATION PLACEHOLDER"
-      })
-    
     #--------Render Help Text--------
     #render descriptive text when help buttons are pressed
     help_title_text <- reactiveValues(text = "")
@@ -393,6 +469,117 @@ server <-
       #return finished map object
       map
     })
+    
+    
+    
+    
+    #--------RENDER OVERVIEW PAGE--------
+    #General text displays
+    output$ov_sidebar_descr <- renderText({
+      paste0(
+        "<div>Select an economic indicator and an inequality indicator to see their relationship plotted and the correlation calculated.</div>"
+      )
+    })
+    output$ov_corr_descr <- renderText({
+      #Formulate data to calculate the correlation
+      plot_corrdata <-
+        aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
+                     gsub(" ", "_", input$ov_econ_select))]
+      test <-
+        psych::corr.test(plot_corrdata[c(1, 2)], method = "kendall")
+      
+      paste0(
+        "<h4>Correlation Statistics</h4><div>P-value: <font color = \"blue\" face = \"helvetica\">",
+        round(test$p[2], digits = 3),
+        "</font><br/>R-value: <font color = \"blue\" face = \"helvetica\">",
+        round(test$r[2], digits = 3),
+        "</font></div>"
+      )
+    })
+    output$ov_summary <- renderText({
+      paste0("<h3>Summary of Correlations</h3><div>description</div>")
+    })
+    
+    #Plot display (similar to other ggplots)
+    output$ov_plot <- renderPlot({
+      #Formulate data to be plotted
+      plot_corrdata <-
+        aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
+                     gsub(" ", "_", input$ov_econ_select))]
+      
+      #Then plot an interactive scatterplot using ggplot, along with hover functions
+      ggplot(data = plot_corrdata,
+             aes(x = plot_corrdata[[1]], y = plot_corrdata[[2]]),
+             group = 1) +
+        theme(text = element_text(family = "Arial", size = 16)) +
+        geom_point(
+          shape = 21,
+          size = 4,
+          show.legend = F,
+          fill = "#DB380B"
+        ) +
+        labs(x = input$ov_inq_select,
+             y = input$ov_econ_select) +
+        geom_smooth(method = 'lm', color = "#0000CC")
+    })
+    
+    output$corr_tooltip <- renderUI({
+      #Formulate data to be plotted
+      plot_corrdata <-
+        aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
+                     gsub(" ", "_", input$ov_econ_select))]
+      
+      #Then do tooltip stuff
+      hover <- input$corr_hover
+      y <-
+        nearPoints(
+          plot_corrdata,
+          input$corr_hover,
+          xvar = gsub(" ", "_", input$ov_inq_select),
+          yvar = gsub(" ", "_", input$ov_econ_select)
+        )[gsub(" ", "_", input$ov_econ_select)]
+      req(nrow(y) != 0)
+      
+      verbatimTextOutput("corrvals")
+    })
+    
+    output$corrvals <- renderText({
+      #Formulate data to be plotted
+      plot_corrdata <-
+        aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
+                     gsub(" ", "_", input$ov_econ_select))]
+      
+      #Then do tooltip stuff
+      hover <- input$corr_hover
+      x <-
+        nearPoints(
+          plot_corrdata,
+          input$corr_hover,
+          xvar = gsub(" ", "_", input$ov_inq_select),
+          yvar = gsub(" ", "_", input$ov_econ_select)
+        )[1]
+      y <-
+        nearPoints(
+          plot_corrdata,
+          input$corr_hover,
+          xvar = gsub(" ", "_", input$ov_inq_select),
+          yvar = gsub(" ", "_", input$ov_econ_select)
+        )[2]
+      req(nrow(y) != 0)
+      
+      to_output <- "Hello There!"
+      to_output
+    })
+    
+    #Render the data table depending on the user's choice of statistical variable
+    output$ov_table <- DT::renderDataTable({
+      if (grepl("P", input$table_val, ignore.case = F)) {
+        p_corrdata
+      }
+      else{
+        r_corrdata
+      }
+    }, options = list(paging = F))
   }
 
 #--------FUNCTIONS--------

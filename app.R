@@ -131,6 +131,8 @@ ui <-
                 #Country select
                 h4("Data Selection"),
                 
+                uiOutput("country_select_text"),
+                
                 inputPanel(
                   selectInput(
                     inputId = "country_select",
@@ -357,7 +359,14 @@ server <-
       to_output
     })  
     
-    #--------Render Statistical Summary--------
+    #--------Render Statistical Summary and other text outputs--------
+    output$country_select_text <- renderText({
+      
+      "Select a country, economic indicator, and an inequality indicator to see 
+      the values plotted and summary statistics calculated."
+      
+    })
+    
     #render statistical summary of selected economic data
     output$econ_stats <-
       renderText({

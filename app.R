@@ -121,66 +121,79 @@ ui <-
                    )
                  )
                )),
-      tabPanel("Country Exploration", 
+      tabPanel(
+        "Country Exploration",
         #Viewing and manipulating country analysis
-        sidebarLayout(
-          #Data selection for country/data analysis
-            sidebarPanel(
-              #Country select
-              h4("Data Selection"),
-              
-              inputPanel(
-                selectInput(
-                  inputId = "country_select",
-                  "Country",
-                  choices = country_selection,
-                  multiple = FALSE,
-                  selectize = T,
-                  width = "180px"
-                )
+        sidebarLayout(#Data selection for country/data analysis
+          sidebarPanel(
+            verticalLayout(
+              sidebarPanel(
+                #Country select
+                h4("Data Selection"),
+                
+                inputPanel(
+                  selectInput(
+                    inputId = "country_select",
+                    "Country",
+                    choices = country_selection,
+                    multiple = FALSE,
+                    selectize = T,
+                    width = "180px"
+                  )
+                ),
+                
+                #Economic data select (and help button)
+                inputPanel(verticalLayout(
+                  selectInput(
+                    inputId = "econ_select",
+                    "Economic Indicator",
+                    choices = econ_selection,
+                    multiple = FALSE,
+                    selectize = T,
+                    width = "180px"
+                  ),
+                  actionButton(
+                    inputId = "help_econ",
+                    label = "What does this mean?",
+                    style = 'padding:4px; font-size:80%'
+                  )
+                )),
+                
+                #Inequality data select (and help button)
+                inputPanel(verticalLayout(
+                  selectInput(
+                    inputId = "inq_select",
+                    "Inequality Indicator",
+                    choices = inq_selection,
+                    multiple = FALSE,
+                    selectize = T,
+                    width = "180px"
+                  ),
+                  actionButton(
+                    inputId = "help_inq",
+                    label = "What does this mean?",
+                    style = 'padding:4px; font-size:80%'
+                  )
+                )),
+                
+                #Output panels for help buttons
+                conditionalPanel(condition = "input.help_econ%2 == 1 || input.help_inq%2 == 1", verticalLayout(
+                  textOutput("help_title", container = h4),
+                  textOutput("help_display")
+                )),
+                width = 12
               ),
               
-              #Economic data select (and help button)
-              inputPanel(verticalLayout(
-                selectInput(
-                  inputId = "econ_select",
-                  "Economic Indicator",
-                  choices = econ_selection,
-                  multiple = FALSE,
-                  selectize = T,
-                  width = "180px"
-                ),
-                actionButton(
-                  inputId = "help_econ",
-                  label = "What does this mean?",
-                  style = 'padding:4px; font-size:80%'
+              #Statistics box on side of page
+              sidebarPanel(verticalLayout(
+                h3("Statistics on Selected Data"),
+                flowLayout(
+                  uiOutput(outputId = "econ_stats"),
+                  uiOutput(outputId = "inq_stats")
                 )
-              )),
-              
-              #Inequality data select (and help button)
-              inputPanel(verticalLayout(
-                selectInput(
-                  inputId = "inq_select",
-                  "Inequality Indicator",
-                  choices = inq_selection,
-                  multiple = FALSE,
-                  selectize = T,
-                  width = "180px"
-                ),
-                actionButton(
-                  inputId = "help_inq",
-                  label = "What does this mean?",
-                  style = 'padding:4px; font-size:80%'
-                )
-              )),
-              
-              #Output panels for help buttons
-              conditionalPanel(condition = "input.help_econ%2 == 1 || input.help_inq%2 == 1", verticalLayout(
-                textOutput("help_title", container = h4),
-                textOutput("help_display")
-              )),
-              width = 4
-            ),
+              ), width = 12)
+            ), width = 4
+          ),
           
           #view for country/data analysis
           mainPanel(
@@ -223,31 +236,24 @@ ui <-
                   });
                   $("#inq_tooltip").show();
                 });
-            });'
-            ), 
+            })
+'
+            ),
             uiOutput("econ_tooltip"),
             uiOutput("inq_tooltip"),
             plotOutput(outputId = "country_econ_plot", hover = "econ_hover", hoverDelay = 0),
-            plotOutput(outputId = "country_inq_plot", hover = "inq_hover", hoverDelay = 0),
-            sidebarPanel(verticalLayout(
-              h3("Statistics on Selected Data"),
-              flowLayout(
-                uiOutput(outputId = "econ_stats"),
-                uiOutput(outputId = "inq_stats")
-              )
-            ), width = 12)
+            plotOutput(outputId = "country_inq_plot", hover = "inq_hover", hoverDelay = 0)
           )
         )
       ),
       tabPanel("New Zealand's Impact",
                verticalLayout(
-                 headerPanel(title = "New Zealand's Trade and Inequality"),
-                 textOutput(outputId = "nz_descr"),
-                 hr(),
+                 sidebarPanel(
+                   uiOutput(outputId = "nz_descr"), width = 12),
                  leafletOutput(outputId = "nz_map")
                ))
-    ), 
-    title = "Trade Balance and Inequality: An Analysis",
+    ),
+    title = "Trade Balance and Inequality:An Analysis",
     theme = shinytheme("sandstone")
   )
 
@@ -391,12 +397,17 @@ server <-
     
     #--------Render NZ Page and Map--------
     #render NZ-centric panel, including text & leaflet map
-    output$nz_descr<- renderText({
-      "description"
+    output$nz_descr <- renderText({
+      "<h3>New Zealand's Trade and Inequality</h3>
+      <div>The interactive map below displays information about developing countries' trade relationships with New Zealand. Some countries have
+      been omitted due to a lack of reliable geographic or trade data. Countries marked <font color = \"#A0A0A0\">grey</font> do not have any 
+      relevant trade data freely available. Countries marked <font color = \"#CCCC00\">yellow</font> provide some data about their trade 
+      relationship with New Zealand. New Zealand has been marked <font color = \"#3a8de0\">blue</font>. All values are in thousand USD (2017), 
+      unless otherwise specified.</div>"
     })
     output$nz_map <- renderLeaflet({
       #setup the map bounds and groups
-      m <- geojsonio::geojson_read("C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/project_material/mapdata/countries.geo.json", what = "sp")
+      m <- geojsonio::geojson_read("./mapdata/countries.geo.json", what = "sp")
       ydatam <- m[m$id %in% inqdata$Country_code[inqdata$Country_code != "AGO" & inqdata$Country_code != "GNB"], ]
       ydatam <- ydatam[order(ydatam$id), ]
       ndatam <- m[m$id %in% inqdata$Country_code[inqdata$Country_code == "AGO" | inqdata$Country_code == "GNB"], ]
@@ -486,18 +497,23 @@ server <-
         aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
                      gsub(" ", "_", input$ov_econ_select))]
       test <-
-        psych::corr.test(plot_corrdata[c(1, 2)], method = "kendall")
+        psych::corr.test(plot_corrdata[c(1, 2)], method = "spearman")
       
       paste0(
         "<h4>Correlation Statistics</h4><div>P-value: <font color = \"blue\" face = \"helvetica\">",
         round(test$p[2], digits = 3),
         "</font><br/>R-value: <font color = \"blue\" face = \"helvetica\">",
         round(test$r[2], digits = 3),
-        "</font></div>"
+        "</font></div>Correlation Strength: ", generate.corr.text(test$r[2])
       )
     })
     output$ov_summary <- renderText({
-      paste0("<h3>Summary of Correlations</h3><div>description</div>")
+      paste0("<h3>Summary of the Correlations</h3><div>To the right is an interactive table which displays the Correlation Coeffeicients and 
+             Probability Values for all pairings of economic and inequality indicators. All correlation tests were performed using the 
+             Spearman method.</div><div>In broad terms, the correlations between the economic and inequality indicators are weak (using alpha = 
+             <font color = \"blue\">0.05</font>). However, this is not the case with all relationships. Net Fuels and
+             Mining Products is positively correlated with the Poverty Headcount Ratio. Travel Services is negatively correlated with 
+             the Poverty Headcount Ratio, yet is positively correlated with the Income Share held by the wealthiest 10%.</div>")
     })
     
     #Plot display (similar to other ggplots)
@@ -519,56 +535,9 @@ server <-
           fill = "#DB380B"
         ) +
         labs(x = input$ov_inq_select,
-             y = input$ov_econ_select) +
+             y = paste(input$ov_econ_select,
+                       " (million USD)")) +
         geom_smooth(method = 'lm', color = "#0000CC")
-    })
-    
-    output$corr_tooltip <- renderUI({
-      #Formulate data to be plotted
-      plot_corrdata <-
-        aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
-                     gsub(" ", "_", input$ov_econ_select))]
-      
-      #Then do tooltip stuff
-      hover <- input$corr_hover
-      y <-
-        nearPoints(
-          plot_corrdata,
-          input$corr_hover,
-          xvar = gsub(" ", "_", input$ov_inq_select),
-          yvar = gsub(" ", "_", input$ov_econ_select)
-        )[gsub(" ", "_", input$ov_econ_select)]
-      req(nrow(y) != 0)
-      
-      verbatimTextOutput("corrvals")
-    })
-    
-    output$corrvals <- renderText({
-      #Formulate data to be plotted
-      plot_corrdata <-
-        aggrdata[, c(gsub(" ", "_", input$ov_inq_select),
-                     gsub(" ", "_", input$ov_econ_select))]
-      
-      #Then do tooltip stuff
-      hover <- input$corr_hover
-      x <-
-        nearPoints(
-          plot_corrdata,
-          input$corr_hover,
-          xvar = gsub(" ", "_", input$ov_inq_select),
-          yvar = gsub(" ", "_", input$ov_econ_select)
-        )[1]
-      y <-
-        nearPoints(
-          plot_corrdata,
-          input$corr_hover,
-          xvar = gsub(" ", "_", input$ov_inq_select),
-          yvar = gsub(" ", "_", input$ov_econ_select)
-        )[2]
-      req(nrow(y) != 0)
-      
-      to_output <- "Hello There!"
-      to_output
     })
     
     #Render the data table depending on the user's choice of statistical variable
@@ -620,23 +589,23 @@ generate.map.text <- function(country_id, data){
       data$name,
       "</strong><br/><div>Imports from NZ: <font color = \"blue\" face = \"helvetica\">",
       nzdata[data$id == nzdata$codes, "Exports_(thousand_USD)"],
-      "</div></font><br/><div>Exports to NZ: <font color = \"blue\" face = \"helvetica\">",
+      "</div></font><div>Exports to NZ: <font color = \"blue\" face = \"helvetica\">",
       nzdata[data$id == nzdata$codes, "Imports_(thousand_USD)"],
-      "</div></font><br/><div>Trade Balance with NZ: <strong><font color = \"blue\" face = \"helvetica\">",
+      "</div></font><div>Trade Balance with NZ: <strong><font color = \"blue\" face = \"helvetica\">",
       (nzdata[data$id == nzdata$codes, "Trade_balance_(thousand_USD)"] *
          -1),
-      "</div></font></strong>"
+      "</div></font></strong><div>NZ's Influence on Inequality: <font color = \"B90B21\"><strong>Weak</strong></font></div>"
     )
   }
   #For NZ
   else if (country_id == "NZL") {
     text <-
       paste0(
-        "<h4><strong>New Zealand</strong></h4><br/><div>Total Imports: <font color = \"#00B200\" face = \"helvetica\">",
+        "<h4><strong>New Zealand</strong></h4><div>Total Imports: <font color = \"#00B200\" face = \"helvetica\">",
         sum(nzdata[, "Imports_(thousand_USD)"], na.rm = T),
-        "</font></div><br/><div>Total Exports: <font color = \"#00B200\" face = \"helvetica\">",
+        "</font></div><div>Total Exports: <font color = \"#00B200\" face = \"helvetica\">",
         sum(nzdata[, "Exports_(thousand_USD)"], na.rm = T),
-        "</font></div><br/><div>Aggregate Trade Balance: <strong><font color = \"00B200\" face = \"helvetica\">",
+        "</font></div><div>Aggregate Trade Balance: <strong><font color = \"00B200\" face = \"helvetica\">",
         sum(nzdata[, "Trade_balance_(thousand_USD)"], na.rm = T),
         "</div></font></strong>"
       )
@@ -645,7 +614,6 @@ generate.map.text <- function(country_id, data){
   else{
     text <- paste0("<strong>", data$name, "</strong><br/><div>No trade data available.</div>")
   }
-  text
 }
 
 #Generates the fill color for a country on the leaflet map
@@ -741,5 +709,19 @@ generate.stats <- function(textdata, input, display) {
     )
   }
 }
+
+#Returns an html-tagged string with the strength of a correlation, determined by a constant alpha level
+generate.corr.text <- function(r){
+  if(r > 0.7 | r < -0.7){
+    "<font color = \"059142\">Strong</font>"
+  }
+  else if(r > -0.25 & r < 0.25){
+    "<font color = \"B90B21\">Weak</font>"
+  }
+  else{
+    "<font color = \"#BEBE0F\">Medium</font>"
+  }
+}
+
 # --------RUN APPLICATION--------
 shinyApp(ui = ui, server = server)

@@ -30,7 +30,7 @@ format.project.econdata <- function(toFormat) {
 
 #Declare constants for economic file loading
 address <-
-  "C:/Users/Asher (GOD)/Desktop/VUW/2019_tri_3/INFO281/project_material/data/"
+  "./data/"
 econfiles <-
   c(
     "Developing_Nations IM-EX[GOOD] (2008-2017).csv",
@@ -255,19 +255,19 @@ p_corrdata <- data.frame(Economic_indicator = character(length = 10),
 p_corrdata$Economic_indicator <- colnames(aggrdata[23:32])
 
 p_corrdata$GINI_index <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
-  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["GINI_index"], method = "kendall")$p, digits = 3)})
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["GINI_index"], method = "spearman")$p, digits = 3)})
 p_corrdata$"Income_share_held_by_top_10%"<- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
-  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Income_share_held_by_top_10%"], method = "kendall")$p, digits = 3)})
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Income_share_held_by_top_10%"], method = "spearman")$p, digits = 3)})
 p_corrdata$"Poverty_headcount_ratio_%_(at_national_lines)" <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
-  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Poverty_headcount_ratio_%_(at_national_lines)"], method = "kendall")$p, digits = 3)})
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Poverty_headcount_ratio_%_(at_national_lines)"], method = "spearman")$p, digits = 3)})
 
 
 r_corrdata <- data.frame(Economic_indicator = character(length = 10),
                          GINI_index = integer(length = 10))
 r_corrdata$Economic_indicator <- colnames(aggrdata[23:32])
 r_corrdata$GINI_index <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
-  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["GINI_index"], method = "kendall")$r, digits = 3)})
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["GINI_index"], method = "spearman")$r, digits = 3)})
 r_corrdata$"Income_share_held_by_top_10%"<- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
-  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Income_share_held_by_top_10%"], method = "kendall")$r, digits = 3)})
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Income_share_held_by_top_10%"], method = "spearman")$r, digits = 3)})
 r_corrdata$"Poverty_headcount_ratio_%_(at_national_lines)" <- by(p_corrdata, 1:nrow(p_corrdata), function(row){ row$GINI_index <- 
-  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Poverty_headcount_ratio_%_(at_national_lines)"], method = "kendall")$r, digits = 3)})
+  round(psych::corr.test(aggrdata[row$Economic_indicator],  aggrdata["Poverty_headcount_ratio_%_(at_national_lines)"], method = "spearman")$r, digits = 3)})

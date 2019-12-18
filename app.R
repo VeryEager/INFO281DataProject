@@ -410,7 +410,7 @@ server <-
       "<h3>New Zealand's Trade and Inequality</h3>
       <div>The interactive map below displays information about developing countries' trade relationships with New Zealand. Some countries have
       been omitted due to a lack of reliable geographic or trade data. Countries marked <font color = \"#A0A0A0\">grey</font> do not have any 
-      relevant trade data freely available. Countries marked <font color = \"#CCCC00\">yellow</font> provide some data about their trade 
+      relevant trade data publicly available. Countries marked <font color = \"#CCCC00\">yellow</font> provide some data about their trade 
       relationship with New Zealand. New Zealand has been marked <font color = \"#3a8de0\">blue</font>. All values are in thousand USD (2017), 
       unless otherwise specified.</div>"
     })
@@ -522,7 +522,7 @@ server <-
              Spearman method.</div><div>In broad terms, the correlations between the economic and inequality indicators are weak (using alpha = 
              <font color = \"blue\">0.05</font>). However, this is not the case with all relationships. Net Fuels and
              Mining Products is positively correlated with the Poverty Headcount Ratio. Travel Services is negatively correlated with 
-             the Poverty Headcount Ratio, yet is positively correlated with the Income Share held by the wealthiest 10%.</div>")
+             the Poverty Headcount Ratio, and is also positively correlated with the Income Share held by the wealthiest 10%.</div>")
     })
     
     #Plot display (similar to other ggplots)
